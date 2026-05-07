@@ -134,16 +134,28 @@ def summarize(projects: list[dict[str, Any]]) -> dict[str, int]:
     """Compute the headline counts."""
     total = len(projects)
     withdrawn = sum(
-        1 for p in projects if (p.get("Request Status") or "").lower() == "withdrawn"
+        1 for p in projects if _is_withdrawn(p)
     )
     ipp_carveouts = sum(
-        1 for p in projects if (p.get("Carve Out Requested") or "").upper() == "IPP"
+        1 for p in projects if _is_ipp(p)
+    )
+    ipp_withdrawn = sum(
+        1 for p in projects if _is_ipp(p) and _is_withdrawn(p)
     )
     return {
         "total": total,
         "withdrawn": withdrawn,
         "ipp_carveouts": ipp_carveouts,
+        "ipp_withdrawn": ipp_withdrawn,
     }
+
+
+def _is_withdrawn(project: dict[str, Any]) -> bool:
+    return (project.get("Request Status") or "").lower() == "withdrawn"
+
+
+def _is_ipp(project: dict[str, Any]) -> bool:
+    return (project.get("Carve Out Requested") or "").upper() == "IPP"
 
 
 # ---------------------------------------------------------------------------
@@ -285,9 +297,16 @@ def _render_html(
 
 def _counts_table(counts: dict[str, int], delta: dict[str, str] | None) -> str:
     rows = [
-        ("Total projects", counts["total"], delta["total"] if delta else None),
-        ("Withdrawn", counts["withdrawn"], delta["withdrawn"] if delta else None),
-        ("IPP carveouts", counts["ipp_carveouts"], delta["ipp_carveouts"] if delta else None),
+        ("Total Projects", counts["total"], delta["total"] if delta else None),
+        ("Total Withdrawn", counts["withdrawn"], delta["withdrawn"] if delta else None),
+        # Visual separator between the two pairs
+        None,
+        ("Total IPP Carveouts", counts["ipp_carveouts"], delta["ipp_carveouts"] if delta else None),
+        (
+            "Total IPP Carveouts Withdrawn",
+            counts["ipp_withdrawn"],
+            delta["ipp_withdrawn"] if delta else None,
+        ),
     ]
     html = (
         "<table style='border-collapse:collapse;font-size:14px;'>"
@@ -301,7 +320,15 @@ def _counts_table(counts: dict[str, int], delta: dict[str, str] | None) -> str:
             "Δ since last</th>"
         )
     html += "</tr></thead><tbody>"
-    for label, count, change in rows:
+    for row in rows:
+        if row is None:
+            # Spacer row separating the two pairs of metrics
+            colspan = 3 if delta else 2
+            html += (
+                f"<tr><td colspan='{colspan}' style='padding:4px 12px;'></td></tr>"
+            )
+            continue
+        label, count, change = row
         html += (
             f"<tr><td style='padding:6px 12px;'>{label}</td>"
             f"<td style='padding:6px 12px;text-align:right;'>{count}</td>"
