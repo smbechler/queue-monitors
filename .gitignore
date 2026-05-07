@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Working files (downloaded xlsx, etc.)
+**/_workdir/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Local env
+.env

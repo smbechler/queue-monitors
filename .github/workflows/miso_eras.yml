@@ -1,0 +1,70 @@
+name: MISO ERAS Monitor
+
+on:
+  schedule:
+    # GitHub Actions cron is UTC. We want 9am and 5pm Eastern Time.
+    # ET is UTC-5 (EST, winter) or UTC-4 (EDT, summer).
+    # We schedule at BOTH possible UTC times and let the script
+    # gate on the actual ET hour, so it runs exactly once per target time
+    # regardless of DST.
+    - cron: "0 13 * * *"   # 9am EDT  / 8am EST
+    - cron: "0 14 * * *"   # 9am EST  / 10am EDT
+    - cron: "0 21 * * *"   # 5pm EDT  / 4pm EST
+    - cron: "0 22 * * *"   # 5pm EST  / 6pm EDT
+  workflow_dispatch:  # also allow manual runs from the Actions tab
+
+# Allow the workflow to push the updated snapshot back to the repo
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check current Eastern Time hour
+        id: gate
+        run: |
+          ET_HOUR=$(TZ='America/New_York' date +%H)
+          echo "Eastern hour is $ET_HOUR"
+          if [ "$ET_HOUR" = "09" ] || [ "$ET_HOUR" = "17" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping — not 9am or 5pm Eastern."
+          fi
+
+      - name: Checkout
+        if: steps.gate.outputs.should_run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.gate.outputs.should_run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        if: steps.gate.outputs.should_run == 'true'
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        if: steps.gate.outputs.should_run == 'true'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
+          MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
+        run: python monitors/miso_eras/monitor.py
+
+      - name: Commit updated snapshot
+        if: steps.gate.outputs.should_run == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add monitors/miso_eras/snapshots/latest.json
+          if git diff --cached --quiet; then
+            echo "No snapshot changes to commit."
+          else
+            git commit -m "miso_eras: snapshot $(TZ='America/New_York' date +'%Y-%m-%d %H:%M %Z')"
+            git push
+          fi
