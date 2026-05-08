@@ -1,118 +1,524 @@
-name: MISO ERAS Monitor
+"""MISO ERAS Interconnection Queue monitor.
 
-# Schedule (in UTC, since GitHub Actions cron is UTC-only):
-# - Checks every 30 min from 9:00 AM to 6:00 PM Eastern Time
-# - Sends email only at 10:00 AM, 3:00 PM, and 6:00 PM Eastern (or on changes)
-#
-# DST handling: these UTC times are correct during EDT (UTC-4), which runs
-# mid-March through early November. When DST flips back to EST (UTC-5) in
-# November, add 1 to every hour value below.
-#
-# Note: GitHub Actions free-tier scheduled workflows can be delayed
-# 15-60+ minutes during peak hours. Treat the times below as targets,
-# not guarantees.
+Fetches the latest ERAS Interconnection Requests spreadsheet from MISO,
+parses it, diffs it against the previous snapshot, and emails a summary.
 
-on:
-  schedule:
-    # ----- 9:00 AM ET (check only) -----
-    - cron: "0 13 * * *"
-    - cron: "30 13 * * *"
-    # ----- 10:00 AM ET (EMAIL) -----
-    - cron: "0 14 * * *"
-    # ----- 10:30 AM - 2:30 PM ET (checks only) -----
-    - cron: "30 14 * * *"
-    - cron: "0 15 * * *"
-    - cron: "30 15 * * *"
-    - cron: "0 16 * * *"
-    - cron: "30 16 * * *"
-    - cron: "0 17 * * *"
-    - cron: "30 17 * * *"
-    - cron: "0 18 * * *"
-    - cron: "30 18 * * *"
-    # ----- 3:00 PM ET (EMAIL) -----
-    - cron: "0 19 * * *"
-    # ----- 3:30 PM - 5:30 PM ET (checks only) -----
-    - cron: "30 19 * * *"
-    - cron: "0 20 * * *"
-    - cron: "30 20 * * *"
-    - cron: "0 21 * * *"
-    - cron: "30 21 * * *"
-    # ----- 6:00 PM ET (EMAIL) -----
-    - cron: "0 22 * * *"
-  workflow_dispatch:  # manual runs always send an email
+Designed to be run on a schedule (GitHub Actions cron). The previous
+snapshot is read from `snapshots/latest.json` in this directory; after
+a successful run, the new snapshot is written to the same path. When
+committed back to the repo, this gives a full history of the queue
+over time via git.
+"""
 
-permissions:
-  contents: write
+from __future__ import annotations
 
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Show timing context
-        id: context
-        run: |
-          echo "UTC time:     $(date -u)"
-          echo "Eastern time: $(TZ='America/New_York' date)"
-          echo "Trigger:      ${{ github.event_name }}"
-          echo "Schedule:     ${{ github.event.schedule }}"
+import json
+import os
+import sys
+import traceback
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
 
-      - name: Decide whether to send email
-        id: should_email
-        run: |
-          # Email-time cron schedules (10am, 3pm, 6pm ET in UTC during EDT).
-          # If the run was manually triggered, always email.
-          # If a change is detected, the script emails regardless of this flag.
-          SCHEDULE='${{ github.event.schedule }}'
-          EVENT='${{ github.event_name }}'
-          if [ "$EVENT" = "workflow_dispatch" ]; then
-            echo "Manual run — will email."
-            echo "send_email=true" >> "$GITHUB_OUTPUT"
-          elif [ "$SCHEDULE" = "0 14 * * *" ] \
-            || [ "$SCHEDULE" = "0 19 * * *" ] \
-            || [ "$SCHEDULE" = "0 22 * * *" ]; then
-            echo "Scheduled email time — will email."
-            echo "send_email=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Silent check — only emails if changes detected."
-            echo "send_email=false" >> "$GITHUB_OUTPUT"
-          fi
+# Make the parent dir importable so `from lib import ...` works
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-      - name: Checkout
-        uses: actions/checkout@v4
+from openpyxl import load_workbook  # noqa: E402
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
+from lib import diff as diff_lib  # noqa: E402
+from lib import fetch, notify  # noqa: E402
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+# ---------------------------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------------------------
 
-      - name: Run monitor
-        env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
-          MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
-          SEND_EMAIL: ${{ steps.should_email.outputs.send_email }}
-        run: python monitors/miso_eras/monitor.py
+MONITOR_NAME = "MISO ERAS Queue"
+LANDING_URL = (
+    "https://www.misoenergy.org/planning/resource-utilization/"
+    "generator-interconnection/"
+)
+# The xlsx filename pattern on MISO's CDN. The numeric ID and ?v= query
+# parameter both change when MISO republishes, so we scrape the landing
+# page for the current link rather than hardcoding it.
+XLSX_PATTERN = r"ERAS[%20\s]+Interconnection[%20\s]+Requests\d+\.xlsx"
 
-      - name: Commit updated snapshot and state
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Add files individually so a missing file doesn't fail the whole step.
-          # (state.json may not exist on the very first run after upgrade.)
-          for f in monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json; do
-            if [ -f "$f" ]; then
-              git add "$f"
-            else
-              echo "Skipping $f (does not exist yet)"
-            fi
-          done
-          if git diff --cached --quiet; then
-            echo "No snapshot or state changes to commit."
-          else
-            git commit -m "miso_eras: snapshot + state update"
-            git push
-          fi
+HERE = Path(__file__).resolve().parent
+SNAPSHOT_DIR = HERE / "snapshots"
+LATEST_SNAPSHOT = SNAPSHOT_DIR / "latest.json"
+STATE_FILE = SNAPSHOT_DIR / "state.json"  # tracks checks-since-last-email
+WORKDIR = HERE / "_workdir"
+
+# Fields that are noisy or expected to vary; ignored when diffing rows.
+# (None for now — we want to see all changes. Add fields here if needed.)
+IGNORE_FIELDS: tuple[str, ...] = ()
+
+# ---------------------------------------------------------------------------
+# Fetch + parse
+# ---------------------------------------------------------------------------
+
+
+def find_xlsx_url() -> str:
+    """Scrape the MISO landing page to find the current xlsx URL.
+
+    Raises a clear error if the link can't be found, so the failure
+    alert email tells you exactly what broke.
+    """
+    resp = fetch.get(LANDING_URL)
+    href = fetch.find_link(resp.text, XLSX_PATTERN)
+    if not href:
+        raise RuntimeError(
+            f"Could not find ERAS xlsx link on {LANDING_URL}. "
+            f"MISO may have changed their page structure. "
+            f"Update XLSX_PATTERN in {Path(__file__).name}."
+        )
+    # Hrefs may be relative or protocol-relative; normalize.
+    if href.startswith("//"):
+        href = "https:" + href
+    elif href.startswith("/"):
+        href = "https://www.misoenergy.org" + href
+    return href
+
+
+def parse_xlsx(path: Path) -> list[dict[str, Any]]:
+    """Parse the ERAS spreadsheet into a list of project dicts.
+
+    The first row is the header. Each subsequent row becomes a dict
+    keyed by column name. We use 'Application ID' as the stable
+    identifier (Project Number can be blank for withdrawn entries).
+    """
+    wb = load_workbook(path, data_only=True, read_only=True)
+    ws = wb.active
+    rows = ws.iter_rows(values_only=True)
+
+    headers_raw = next(rows, None)
+    if not headers_raw:
+        raise RuntimeError("Spreadsheet is empty — no header row found")
+    headers = [_clean_header(h) for h in headers_raw]
+
+    projects: list[dict[str, Any]] = []
+    for row in rows:
+        if not any(cell not in (None, "") for cell in row):
+            continue  # skip blank rows
+        record = {headers[i]: _clean_value(row[i]) for i in range(len(headers)) if i < len(row)}
+        # Use Application ID as the stable id field for diffing.
+        app_id = record.get("Application ID")
+        if app_id is None:
+            continue
+        record["id"] = str(app_id)
+        projects.append(record)
+
+    wb.close()
+    return projects
+
+
+def _clean_header(value: Any) -> str:
+    if value is None:
+        return ""
+    return " ".join(str(value).split())
+
+
+def _clean_value(value: Any) -> Any:
+    if isinstance(value, str):
+        stripped = " ".join(value.split())
+        return stripped if stripped else None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
+# ---------------------------------------------------------------------------
+# Summarize
+# ---------------------------------------------------------------------------
+
+
+def summarize(projects: list[dict[str, Any]]) -> dict[str, int]:
+    """Compute the headline counts."""
+    total = len(projects)
+    withdrawn = sum(
+        1 for p in projects if _is_withdrawn(p)
+    )
+    ipp_carveouts = sum(
+        1 for p in projects if _is_ipp(p)
+    )
+    ipp_withdrawn = sum(
+        1 for p in projects if _is_ipp(p) and _is_withdrawn(p)
+    )
+    return {
+        "total": total,
+        "withdrawn": withdrawn,
+        "ipp_carveouts": ipp_carveouts,
+        "ipp_withdrawn": ipp_withdrawn,
+    }
+
+
+def _is_withdrawn(project: dict[str, Any]) -> bool:
+    return (project.get("Request Status") or "").lower() == "withdrawn"
+
+
+def _is_ipp(project: dict[str, Any]) -> bool:
+    return (project.get("Carve Out Requested") or "").upper() == "IPP"
+
+
+# ---------------------------------------------------------------------------
+# Snapshot I/O
+# ---------------------------------------------------------------------------
+
+
+def load_previous() -> list[dict[str, Any]] | None:
+    if not LATEST_SNAPSHOT.exists():
+        return None
+    with LATEST_SNAPSHOT.open("r") as f:
+        data = json.load(f)
+    return data.get("projects")
+
+
+def save_snapshot(projects: list[dict[str, Any]], xlsx_url: str) -> None:
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    snapshot = {
+        "captured_at": datetime.now(timezone.utc).isoformat(),
+        "source_url": xlsx_url,
+        "projects": projects,
+    }
+    with LATEST_SNAPSHOT.open("w") as f:
+        json.dump(snapshot, f, indent=2, default=str)
+
+
+def previous_capture_time() -> str | None:
+    if not LATEST_SNAPSHOT.exists():
+        return None
+    try:
+        with LATEST_SNAPSHOT.open("r") as f:
+            return json.load(f).get("captured_at")
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def load_state() -> dict[str, Any]:
+    """Load the run-state file. Tracks counter of checks since last email."""
+    if not STATE_FILE.exists():
+        return {"checks_since_last_email": 0, "last_email_at": None}
+    try:
+        with STATE_FILE.open("r") as f:
+            return json.load(f)
+    except Exception:  # noqa: BLE001
+        return {"checks_since_last_email": 0, "last_email_at": None}
+
+
+def save_state(state: dict[str, Any]) -> None:
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with STATE_FILE.open("w") as f:
+        json.dump(state, f, indent=2)
+
+
+# ---------------------------------------------------------------------------
+# Email formatting
+# ---------------------------------------------------------------------------
+
+
+def format_email(
+    counts: dict[str, int],
+    prev_counts: dict[str, int] | None,
+    diff: diff_lib.Diff | None,
+    xlsx_url: str,
+    last_check: str | None,
+    checks_since_last_email: int,
+    is_change_alert: bool,
+) -> tuple[str, str]:
+    """Return (subject, html_body)."""
+    delta = _format_deltas(counts, prev_counts) if prev_counts else None
+
+    # Subject line packs the most important info
+    if diff is None:
+        subject = f"MISO ERAS — initial snapshot ({counts['total']} projects)"
+    elif diff.has_changes:
+        bits = []
+        if diff.added:
+            bits.append(f"+{len(diff.added)}")
+        if diff.removed:
+            bits.append(f"-{len(diff.removed)}")
+        if diff.changed:
+            bits.append(f"~{len(diff.changed)}")
+        prefix = "MISO ERAS [CHANGE]" if is_change_alert else "MISO ERAS"
+        subject = f"{prefix} — {' '.join(bits)} | total {counts['total']}"
+    else:
+        subject = f"MISO ERAS — no changes | total {counts['total']}"
+
+    html = _render_html(
+        counts, delta, diff, xlsx_url, last_check, checks_since_last_email
+    )
+    return subject, html
+
+
+def _format_deltas(
+    current: dict[str, int], previous: dict[str, int]
+) -> dict[str, str]:
+    out = {}
+    for key in current:
+        diff = current[key] - previous.get(key, 0)
+        if diff > 0:
+            out[key] = f"+{diff}"
+        elif diff < 0:
+            out[key] = f"{diff}"
+        else:
+            out[key] = "—"
+    return out
+
+
+def _render_html(
+    counts: dict[str, int],
+    delta: dict[str, str] | None,
+    diff: diff_lib.Diff | None,
+    xlsx_url: str,
+    last_check: str | None,
+    checks_since_last_email: int,
+) -> str:
+    parts: list[str] = []
+    parts.append(
+        "<div style='font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;"
+        "max-width:680px;color:#222;'>"
+    )
+    parts.append("<h2 style='margin-bottom:4px;'>MISO ERAS Queue Update</h2>")
+    # checks_since_last_email is the number of checks performed since the
+    # previous email, INCLUDING this one. So "1" = just this run, no extras.
+    if checks_since_last_email <= 1:
+        check_msg = "First check since last email."
+    else:
+        check_msg = (
+            f"{checks_since_last_email} checks performed since last email "
+            f"(including this one)."
+        )
+    parts.append(
+        f"<p style='color:#666;margin-top:0;font-size:13px;'>"
+        f"Checked at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
+        + (f" · last check: {last_check}" if last_check else "")
+        + f"<br>{check_msg}"
+        + "</p>"
+    )
+
+    # ---- Changes summary (top of email) ----
+    parts.append("<h3>What changed</h3>")
+    if diff is None:
+        parts.append(
+            "<p><em>This is the first snapshot — no previous data to compare against.</em></p>"
+        )
+    elif not diff.has_changes:
+        parts.append("<p>No changes since last check.</p>")
+    else:
+        if diff.added:
+            parts.append(f"<h4>Added ({len(diff.added)})</h4>")
+            parts.append(_project_list(diff.added))
+        if diff.removed:
+            parts.append(f"<h4>Removed ({len(diff.removed)})</h4>")
+            parts.append(_project_list(diff.removed))
+        if diff.changed:
+            parts.append(f"<h4>Status / field changes ({len(diff.changed)})</h4>")
+            parts.append(_changes_list(diff.changed))
+
+    # ---- Counts table ----
+    parts.append("<h3>Counts</h3>")
+    parts.append(_counts_table(counts, delta))
+
+    # ---- Source link ----
+    parts.append(
+        f"<p style='margin-top:24px;font-size:13px;'>"
+        f"Source: <a href='{xlsx_url}'>latest spreadsheet</a> · "
+        f"<a href='{LANDING_URL}'>MISO Generator Interconnection page</a>"
+        f"</p>"
+    )
+    parts.append("</div>")
+    return "".join(parts)
+
+
+def _counts_table(counts: dict[str, int], delta: dict[str, str] | None) -> str:
+    rows = [
+        ("Total Projects", counts["total"], delta["total"] if delta else None),
+        ("Total Withdrawn", counts["withdrawn"], delta["withdrawn"] if delta else None),
+        # Visual separator between the two pairs
+        None,
+        ("Total IPP Carveouts", counts["ipp_carveouts"], delta["ipp_carveouts"] if delta else None),
+        (
+            "Total IPP Carveouts Withdrawn",
+            counts["ipp_withdrawn"],
+            delta["ipp_withdrawn"] if delta else None,
+        ),
+    ]
+    html = (
+        "<table style='border-collapse:collapse;font-size:14px;'>"
+        "<thead><tr>"
+        "<th style='text-align:left;padding:6px 12px;border-bottom:1px solid #ddd;'>Metric</th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:1px solid #ddd;'>Count</th>"
+    )
+    if delta:
+        html += (
+            "<th style='text-align:right;padding:6px 12px;border-bottom:1px solid #ddd;'>"
+            "Δ since last</th>"
+        )
+    html += "</tr></thead><tbody>"
+    for row in rows:
+        if row is None:
+            # Spacer row separating the two pairs of metrics
+            colspan = 3 if delta else 2
+            html += (
+                f"<tr><td colspan='{colspan}' style='padding:4px 12px;'></td></tr>"
+            )
+            continue
+        label, count, change = row
+        html += (
+            f"<tr><td style='padding:6px 12px;'>{label}</td>"
+            f"<td style='padding:6px 12px;text-align:right;'>{count}</td>"
+        )
+        if delta:
+            color = "#888" if change == "—" else ("#0a7d2c" if change.startswith("+") else "#b3261e")
+            html += f"<td style='padding:6px 12px;text-align:right;color:{color};'>{change}</td>"
+        html += "</tr>"
+    html += "</tbody></table>"
+    return html
+
+
+def _project_list(projects: list[dict[str, Any]]) -> str:
+    items = []
+    for p in projects:
+        label = _project_label(p)
+        items.append(f"<li>{label}</li>")
+    return "<ul style='font-size:14px;'>" + "".join(items) + "</ul>"
+
+
+def _changes_list(
+    changes: list[tuple[str, dict[str, tuple[Any, Any]]]],
+) -> str:
+    items = []
+    for project_id, field_changes in changes:
+        change_bits = []
+        for field_name, (old, new) in field_changes.items():
+            change_bits.append(
+                f"<li><strong>{field_name}:</strong> "
+                f"<span style='color:#b3261e;'>{_fmt(old)}</span> → "
+                f"<span style='color:#0a7d2c;'>{_fmt(new)}</span></li>"
+            )
+        items.append(
+            f"<li><strong>Application {project_id}</strong>"
+            f"<ul style='margin-top:4px;'>{''.join(change_bits)}</ul></li>"
+        )
+    return "<ul style='font-size:14px;'>" + "".join(items) + "</ul>"
+
+
+def _project_label(p: dict[str, Any]) -> str:
+    pid = p.get("id", "?")
+    customer = p.get("Interconnection Customer") or "(no customer listed)"
+    status = p.get("Request Status") or "?"
+    state = p.get("State") or ""
+    fuel = p.get("Fuel Type") or ""
+    bits = [f"<strong>App {pid}</strong>", f"{customer}", f"[{status}]"]
+    if state:
+        bits.append(state)
+    if fuel:
+        bits.append(fuel)
+    return " · ".join(bits)
+
+
+def _fmt(value: Any) -> str:
+    if value is None or value == "":
+        return "<em>(empty)</em>"
+    return str(value)
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+
+def main() -> int:
+    recipient = os.environ.get("MONITOR_TO_ADDR")
+    if not recipient:
+        print("ERROR: MONITOR_TO_ADDR not set", file=sys.stderr)
+        return 2
+
+    # SEND_EMAIL is set to "true" by the workflow on scheduled-email times
+    # (10am, 3pm, 6pm ET) and on manual runs. Otherwise we still check and
+    # diff, but only email if there's an actual change to report.
+    is_scheduled_email_time = (
+        os.environ.get("SEND_EMAIL", "").lower() == "true"
+    )
+
+    try:
+        WORKDIR.mkdir(parents=True, exist_ok=True)
+
+        print(f"[{MONITOR_NAME}] discovering current xlsx URL…")
+        xlsx_url = find_xlsx_url()
+        print(f"[{MONITOR_NAME}] found: {xlsx_url}")
+
+        print(f"[{MONITOR_NAME}] downloading…")
+        local_xlsx = fetch.download(xlsx_url, WORKDIR / "current.xlsx")
+
+        print(f"[{MONITOR_NAME}] parsing…")
+        projects = parse_xlsx(local_xlsx)
+        print(f"[{MONITOR_NAME}] parsed {len(projects)} projects")
+
+        counts = summarize(projects)
+        print(f"[{MONITOR_NAME}] counts: {counts}")
+
+        previous = load_previous()
+        if previous is None:
+            diff = None
+            prev_counts = None
+        else:
+            diff = diff_lib.diff_snapshots(
+                previous, projects, id_field="id", ignore_fields=IGNORE_FIELDS
+            )
+            prev_counts = summarize(previous)
+
+        # Decide whether to email:
+        # - Yes, if this is a scheduled-email time (10am/3pm/6pm or manual)
+        # - Yes, if it's the initial snapshot (no previous data)
+        # - Yes, if anything changed since the last check
+        # - Otherwise, just check silently and update the counter
+        has_changes = diff is not None and diff.has_changes
+        is_initial = diff is None
+        send = is_scheduled_email_time or has_changes or is_initial
+        is_change_alert = has_changes and not is_scheduled_email_time
+
+        # Update the check counter. It tracks checks since the last email,
+        # including the current one.
+        state = load_state()
+        state["checks_since_last_email"] = (
+            state.get("checks_since_last_email", 0) + 1
+        )
+
+        last_check = previous_capture_time()
+
+        if send:
+            subject, html = format_email(
+                counts,
+                prev_counts,
+                diff,
+                xlsx_url,
+                last_check,
+                checks_since_last_email=state["checks_since_last_email"],
+                is_change_alert=is_change_alert,
+            )
+            print(f"[{MONITOR_NAME}] sending email: {subject}")
+            notify.send_email(to=recipient, subject=subject, html=html)
+            # Reset counter after a successful email
+            state["checks_since_last_email"] = 0
+            state["last_email_at"] = datetime.now(timezone.utc).isoformat()
+        else:
+            print(
+                f"[{MONITOR_NAME}] silent check "
+                f"(#{state['checks_since_last_email']} since last email) — "
+                f"no scheduled email, no changes"
+            )
+
+        save_snapshot(projects, xlsx_url)
+        save_state(state)
+        print(f"[{MONITOR_NAME}] snapshot + state saved")
+        return 0
+
+    except Exception as exc:  # noqa: BLE001
+        tb = traceback.format_exc()
+        print(tb, file=sys.stderr)
+        notify.send_failure_alert(recipient, MONITOR_NAME, tb)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
