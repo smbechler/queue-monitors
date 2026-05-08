@@ -101,7 +101,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json
+          # Add files individually so a missing file doesn't fail the whole step.
+          # (state.json may not exist on the very first run after upgrade.)
+          for f in monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json; do
+            if [ -f "$f" ]; then
+              git add "$f"
+            else
+              echo "Skipping $f (does not exist yet)"
+            fi
+          done
           if git diff --cached --quiet; then
             echo "No snapshot or state changes to commit."
           else
