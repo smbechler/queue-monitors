@@ -45,6 +45,7 @@ XLSX_PATTERN = r"ERAS[%20\s]+Interconnection[%20\s]+Requests\d+\.xlsx"
 HERE = Path(__file__).resolve().parent
 SNAPSHOT_DIR = HERE / "snapshots"
 LATEST_SNAPSHOT = SNAPSHOT_DIR / "latest.json"
+STATE_FILE = SNAPSHOT_DIR / "state.json"  # tracks checks-since-last-email
 WORKDIR = HERE / "_workdir"
 
 # Fields that are noisy or expected to vary; ignored when diffing rows.
@@ -192,6 +193,23 @@ def previous_capture_time() -> str | None:
         return None
 
 
+def load_state() -> dict[str, Any]:
+    """Load the run-state file. Tracks counter of checks since last email."""
+    if not STATE_FILE.exists():
+        return {"checks_since_last_email": 0, "last_email_at": None}
+    try:
+        with STATE_FILE.open("r") as f:
+            return json.load(f)
+    except Exception:  # noqa: BLE001
+        return {"checks_since_last_email": 0, "last_email_at": None}
+
+
+def save_state(state: dict[str, Any]) -> None:
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with STATE_FILE.open("w") as f:
+        json.dump(state, f, indent=2)
+
+
 # ---------------------------------------------------------------------------
 # Email formatting
 # ---------------------------------------------------------------------------
@@ -203,6 +221,8 @@ def format_email(
     diff: diff_lib.Diff | None,
     xlsx_url: str,
     last_check: str | None,
+    checks_since_last_email: int,
+    is_change_alert: bool,
 ) -> tuple[str, str]:
     """Return (subject, html_body)."""
     delta = _format_deltas(counts, prev_counts) if prev_counts else None
@@ -218,11 +238,14 @@ def format_email(
             bits.append(f"-{len(diff.removed)}")
         if diff.changed:
             bits.append(f"~{len(diff.changed)}")
-        subject = f"MISO ERAS — {' '.join(bits)} | total {counts['total']}"
+        prefix = "MISO ERAS [CHANGE]" if is_change_alert else "MISO ERAS"
+        subject = f"{prefix} — {' '.join(bits)} | total {counts['total']}"
     else:
         subject = f"MISO ERAS — no changes | total {counts['total']}"
 
-    html = _render_html(counts, delta, diff, xlsx_url, last_check)
+    html = _render_html(
+        counts, delta, diff, xlsx_url, last_check, checks_since_last_email
+    )
     return subject, html
 
 
@@ -247,6 +270,7 @@ def _render_html(
     diff: diff_lib.Diff | None,
     xlsx_url: str,
     last_check: str | None,
+    checks_since_last_email: int,
 ) -> str:
     parts: list[str] = []
     parts.append(
@@ -254,10 +278,20 @@ def _render_html(
         "max-width:680px;color:#222;'>"
     )
     parts.append("<h2 style='margin-bottom:4px;'>MISO ERAS Queue Update</h2>")
+    # checks_since_last_email is the number of checks performed since the
+    # previous email, INCLUDING this one. So "1" = just this run, no extras.
+    if checks_since_last_email <= 1:
+        check_msg = "First check since last email."
+    else:
+        check_msg = (
+            f"{checks_since_last_email} checks performed since last email "
+            f"(including this one)."
+        )
     parts.append(
         f"<p style='color:#666;margin-top:0;font-size:13px;'>"
         f"Checked at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
         + (f" · last check: {last_check}" if last_check else "")
+        + f"<br>{check_msg}"
         + "</p>"
     )
 
@@ -399,6 +433,13 @@ def main() -> int:
         print("ERROR: MONITOR_TO_ADDR not set", file=sys.stderr)
         return 2
 
+    # SEND_EMAIL is set to "true" by the workflow on scheduled-email times
+    # (10am, 3pm, 6pm ET) and on manual runs. Otherwise we still check and
+    # diff, but only email if there's an actual change to report.
+    is_scheduled_email_time = (
+        os.environ.get("SEND_EMAIL", "").lower() == "true"
+    )
+
     try:
         WORKDIR.mkdir(parents=True, exist_ok=True)
 
@@ -426,14 +467,50 @@ def main() -> int:
             )
             prev_counts = summarize(previous)
 
-        last_check = previous_capture_time()
-        subject, html = format_email(counts, prev_counts, diff, xlsx_url, last_check)
+        # Decide whether to email:
+        # - Yes, if this is a scheduled-email time (10am/3pm/6pm or manual)
+        # - Yes, if it's the initial snapshot (no previous data)
+        # - Yes, if anything changed since the last check
+        # - Otherwise, just check silently and update the counter
+        has_changes = diff is not None and diff.has_changes
+        is_initial = diff is None
+        send = is_scheduled_email_time or has_changes or is_initial
+        is_change_alert = has_changes and not is_scheduled_email_time
 
-        print(f"[{MONITOR_NAME}] sending email: {subject}")
-        notify.send_email(to=recipient, subject=subject, html=html)
+        # Update the check counter. It tracks checks since the last email,
+        # including the current one.
+        state = load_state()
+        state["checks_since_last_email"] = (
+            state.get("checks_since_last_email", 0) + 1
+        )
+
+        last_check = previous_capture_time()
+
+        if send:
+            subject, html = format_email(
+                counts,
+                prev_counts,
+                diff,
+                xlsx_url,
+                last_check,
+                checks_since_last_email=state["checks_since_last_email"],
+                is_change_alert=is_change_alert,
+            )
+            print(f"[{MONITOR_NAME}] sending email: {subject}")
+            notify.send_email(to=recipient, subject=subject, html=html)
+            # Reset counter after a successful email
+            state["checks_since_last_email"] = 0
+            state["last_email_at"] = datetime.now(timezone.utc).isoformat()
+        else:
+            print(
+                f"[{MONITOR_NAME}] silent check "
+                f"(#{state['checks_since_last_email']} since last email) — "
+                f"no scheduled email, no changes"
+            )
 
         save_snapshot(projects, xlsx_url)
-        print(f"[{MONITOR_NAME}] snapshot saved")
+        save_state(state)
+        print(f"[{MONITOR_NAME}] snapshot + state saved")
         return 0
 
     except Exception as exc:  # noqa: BLE001
