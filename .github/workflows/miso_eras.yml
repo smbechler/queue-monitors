@@ -1,19 +1,45 @@
 name: MISO ERAS Monitor
 
+# IMPORTANT: GitHub Actions cron is UTC and frequently runs LATE on the
+# free tier (often 15-60+ minutes late during peak hours). The previous
+# version of this file had a "gate" step that compared the runner's
+# Eastern Time hour against 9am/5pm and skipped runs that didn't match.
+# That broke whenever GitHub delayed a cron — by the time the runner
+# actually started, the ET hour had already moved on, so the gate
+# skipped every scheduled run. The result: zero scheduled emails.
+#
+# This version removes the gate. Every cron fires the monitor unconditionally.
+# DST is handled manually: during EDT (mid-March - early November) use
+# UTC times 13 and 21; during EST swap to 14 and 22.
+#
+# CURRENTLY: dense testing schedule (every 30 min from 14:00-21:30 UTC =
+# 10am-5:30pm EDT). Once you've confirmed it's working, replace the
+# schedule block with just the two production crons (commented below).
+
 on:
   schedule:
-    # GitHub Actions cron is UTC. We want 9am and 5pm Eastern Time.
-    # ET is UTC-5 (EST, winter) or UTC-4 (EDT, summer).
-    # We schedule at BOTH possible UTC times and let the script
-    # gate on the actual ET hour, so it runs exactly once per target time
-    # regardless of DST.
-    - cron: "0 13 * * *"   # 9am EDT  / 8am EST
-    - cron: "0 14 * * *"   # 9am EST  / 10am EDT
-    - cron: "0 21 * * *"   # 5pm EDT  / 4pm EST
-    - cron: "0 22 * * *"   # 5pm EST  / 6pm EDT
-  workflow_dispatch:  # also allow manual runs from the Actions tab
+    # ----- TESTING SCHEDULE (delete after verifying) -----
+    - cron: "0 14 * * *"     # 10:00 AM EDT
+    - cron: "30 14 * * *"    # 10:30 AM EDT
+    - cron: "0 15 * * *"     # 11:00 AM EDT
+    - cron: "30 15 * * *"    # 11:30 AM EDT
+    - cron: "0 16 * * *"     # 12:00 PM EDT
+    - cron: "30 16 * * *"    # 12:30 PM EDT
+    - cron: "0 17 * * *"     # 1:00 PM EDT
+    - cron: "30 17 * * *"    # 1:30 PM EDT
+    - cron: "0 18 * * *"     # 2:00 PM EDT
+    - cron: "30 18 * * *"    # 2:30 PM EDT
+    - cron: "0 19 * * *"     # 3:00 PM EDT
+    - cron: "30 19 * * *"    # 3:30 PM EDT
+    - cron: "0 20 * * *"     # 4:00 PM EDT
+    - cron: "30 20 * * *"    # 4:30 PM EDT
+    - cron: "0 21 * * *"     # 5:00 PM EDT
+    - cron: "30 21 * * *"    # 5:30 PM EDT
+    # ----- PRODUCTION SCHEDULE (uncomment after testing) -----
+    # - cron: "0 13 * * *"   # 9:00 AM EDT (change to 14 in winter)
+    # - cron: "0 21 * * *"   # 5:00 PM EDT (change to 22 in winter)
+  workflow_dispatch:  # allow manual runs from the Actions tab
 
-# Allow the workflow to push the updated snapshot back to the repo
 permissions:
   contents: write
 
@@ -21,35 +47,26 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - name: Check current Eastern Time hour
-        id: gate
+      - name: Show timing context
         run: |
-          ET_HOUR=$(TZ='America/New_York' date +%H)
-          echo "Eastern hour is $ET_HOUR"
-          if [ "$ET_HOUR" = "09" ] || [ "$ET_HOUR" = "17" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "should_run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "should_run=false" >> "$GITHUB_OUTPUT"
-            echo "Skipping — not 9am or 5pm Eastern."
-          fi
+          echo "UTC time:     $(date -u)"
+          echo "Eastern time: $(TZ='America/New_York' date)"
+          echo "Trigger:      ${{ github.event_name }}"
+          echo "Schedule:     ${{ github.event.schedule }}"
 
       - name: Checkout
-        if: steps.gate.outputs.should_run == 'true'
         uses: actions/checkout@v4
 
       - name: Set up Python
-        if: steps.gate.outputs.should_run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
 
       - name: Install dependencies
-        if: steps.gate.outputs.should_run == 'true'
         run: pip install -r requirements.txt
 
       - name: Run monitor
-        if: steps.gate.outputs.should_run == 'true'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
@@ -57,7 +74,6 @@ jobs:
         run: python monitors/miso_eras/monitor.py
 
       - name: Commit updated snapshot
-        if: steps.gate.outputs.should_run == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -65,6 +81,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No snapshot changes to commit."
           else
-            git commit -m "miso_eras: snapshot $(TZ='America/New_York' date +'%Y-%m-%d %H:%M %Z')"
+            git commit -m "miso_eras: snapshot update"
             git push
           fi
