@@ -1,44 +1,45 @@
 name: MISO ERAS Monitor
 
-# IMPORTANT: GitHub Actions cron is UTC and frequently runs LATE on the
-# free tier (often 15-60+ minutes late during peak hours). The previous
-# version of this file had a "gate" step that compared the runner's
-# Eastern Time hour against 9am/5pm and skipped runs that didn't match.
-# That broke whenever GitHub delayed a cron — by the time the runner
-# actually started, the ET hour had already moved on, so the gate
-# skipped every scheduled run. The result: zero scheduled emails.
+# Schedule (in UTC, since GitHub Actions cron is UTC-only):
+# - Checks every 30 min from 9:00 AM to 6:00 PM Eastern Time
+# - Sends email only at 10:00 AM, 3:00 PM, and 6:00 PM Eastern (or on changes)
 #
-# This version removes the gate. Every cron fires the monitor unconditionally.
-# DST is handled manually: during EDT (mid-March - early November) use
-# UTC times 13 and 21; during EST swap to 14 and 22.
+# DST handling: these UTC times are correct during EDT (UTC-4), which runs
+# mid-March through early November. When DST flips back to EST (UTC-5) in
+# November, add 1 to every hour value below.
 #
-# CURRENTLY: dense testing schedule (every 30 min from 14:00-21:30 UTC =
-# 10am-5:30pm EDT). Once you've confirmed it's working, replace the
-# schedule block with just the two production crons (commented below).
+# Note: GitHub Actions free-tier scheduled workflows can be delayed
+# 15-60+ minutes during peak hours. Treat the times below as targets,
+# not guarantees.
 
 on:
   schedule:
-    # ----- TESTING SCHEDULE (delete after verifying) -----
-    - cron: "0 14 * * *"     # 10:00 AM EDT
-    - cron: "30 14 * * *"    # 10:30 AM EDT
-    - cron: "0 15 * * *"     # 11:00 AM EDT
-    - cron: "30 15 * * *"    # 11:30 AM EDT
-    - cron: "0 16 * * *"     # 12:00 PM EDT
-    - cron: "30 16 * * *"    # 12:30 PM EDT
-    - cron: "0 17 * * *"     # 1:00 PM EDT
-    - cron: "30 17 * * *"    # 1:30 PM EDT
-    - cron: "0 18 * * *"     # 2:00 PM EDT
-    - cron: "30 18 * * *"    # 2:30 PM EDT
-    - cron: "0 19 * * *"     # 3:00 PM EDT
-    - cron: "30 19 * * *"    # 3:30 PM EDT
-    - cron: "0 20 * * *"     # 4:00 PM EDT
-    - cron: "30 20 * * *"    # 4:30 PM EDT
-    - cron: "0 21 * * *"     # 5:00 PM EDT
-    - cron: "30 21 * * *"    # 5:30 PM EDT
-    # ----- PRODUCTION SCHEDULE (uncomment after testing) -----
-    # - cron: "0 13 * * *"   # 9:00 AM EDT (change to 14 in winter)
-    # - cron: "0 21 * * *"   # 5:00 PM EDT (change to 22 in winter)
-  workflow_dispatch:  # allow manual runs from the Actions tab
+    # ----- 9:00 AM ET (check only) -----
+    - cron: "0 13 * * *"
+    - cron: "30 13 * * *"
+    # ----- 10:00 AM ET (EMAIL) -----
+    - cron: "0 14 * * *"
+    # ----- 10:30 AM - 2:30 PM ET (checks only) -----
+    - cron: "30 14 * * *"
+    - cron: "0 15 * * *"
+    - cron: "30 15 * * *"
+    - cron: "0 16 * * *"
+    - cron: "30 16 * * *"
+    - cron: "0 17 * * *"
+    - cron: "30 17 * * *"
+    - cron: "0 18 * * *"
+    - cron: "30 18 * * *"
+    # ----- 3:00 PM ET (EMAIL) -----
+    - cron: "0 19 * * *"
+    # ----- 3:30 PM - 5:30 PM ET (checks only) -----
+    - cron: "30 19 * * *"
+    - cron: "0 20 * * *"
+    - cron: "30 20 * * *"
+    - cron: "0 21 * * *"
+    - cron: "30 21 * * *"
+    # ----- 6:00 PM ET (EMAIL) -----
+    - cron: "0 22 * * *"
+  workflow_dispatch:  # manual runs always send an email
 
 permissions:
   contents: write
@@ -48,11 +49,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show timing context
+        id: context
         run: |
           echo "UTC time:     $(date -u)"
           echo "Eastern time: $(TZ='America/New_York' date)"
           echo "Trigger:      ${{ github.event_name }}"
           echo "Schedule:     ${{ github.event.schedule }}"
+
+      - name: Decide whether to send email
+        id: should_email
+        run: |
+          # Email-time cron schedules (10am, 3pm, 6pm ET in UTC during EDT).
+          # If the run was manually triggered, always email.
+          # If a change is detected, the script emails regardless of this flag.
+          SCHEDULE='${{ github.event.schedule }}'
+          EVENT='${{ github.event_name }}'
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Manual run — will email."
+            echo "send_email=true" >> "$GITHUB_OUTPUT"
+          elif [ "$SCHEDULE" = "0 14 * * *" ] \
+            || [ "$SCHEDULE" = "0 19 * * *" ] \
+            || [ "$SCHEDULE" = "0 22 * * *" ]; then
+            echo "Scheduled email time — will email."
+            echo "send_email=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Silent check — only emails if changes detected."
+            echo "send_email=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,16 +94,17 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
           MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
+          SEND_EMAIL: ${{ steps.should_email.outputs.send_email }}
         run: python monitors/miso_eras/monitor.py
 
-      - name: Commit updated snapshot
+      - name: Commit updated snapshot and state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add monitors/miso_eras/snapshots/latest.json
+          git add monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json
           if git diff --cached --quiet; then
-            echo "No snapshot changes to commit."
+            echo "No snapshot or state changes to commit."
           else
-            git commit -m "miso_eras: snapshot update"
+            git commit -m "miso_eras: snapshot + state update"
             git push
           fi
