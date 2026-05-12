@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-05-12T20:56:54.443023+00:00",
+  "captured_at": "2026-05-12T21:05:49.172474+00:00",
   "source_last_updated": "5/12/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
@@ -15942,7 +15942,7 @@
       "State": "MO",
       "TO at POI": "GMO",
       "In-Service Date": "7/1/2025",
-      "Commercial Operation Date": "12/31/2027",
+      "Commercial Operation Date": "4/11/2030",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "95",
@@ -15957,7 +15957,7 @@
       "Substation or Line": "Windsor to AEC Sedalia 161 kV",
       "Request Received": "4/30/2021",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
