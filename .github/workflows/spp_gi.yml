@@ -1,0 +1,62 @@
+name: SPP GI Monitor
+
+# Once-daily check, 9am Eastern. Always emails — even on no-change days —
+# so you know the monitor is still alive.
+#
+# DST note: during EDT (UTC-4), 9am ET = 13:00 UTC. During EST (UTC-5),
+# 9am ET = 14:00 UTC. When DST flips in November, change the hour value
+# from 13 to 14.
+
+on:
+  schedule:
+    - cron: "0 13 * * *"   # 9:00 AM EDT (change to 14 in winter)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show timing context
+        run: |
+          echo "UTC time:     $(date -u)"
+          echo "Eastern time: $(TZ='America/New_York' date)"
+          echo "Trigger:      ${{ github.event_name }}"
+          echo "Schedule:     ${{ github.event.schedule }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
+          MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
+        run: python monitors/spp_gi/monitor.py
+
+      - name: Commit updated snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f "monitors/spp_gi/snapshots/latest.json" ]; then
+            git add monitors/spp_gi/snapshots/latest.json
+          else
+            echo "No snapshot file to commit (script may have failed)."
+          fi
+          if git diff --cached --quiet; then
+            echo "No snapshot changes to commit."
+          else
+            git commit -m "spp_gi: snapshot update"
+            git push
+          fi
