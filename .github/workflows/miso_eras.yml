@@ -1,8 +1,8 @@
 name: MISO ERAS Monitor
 
 # Schedule (in UTC, since GitHub Actions cron is UTC-only):
-# - Checks every 30 min from 9:00 AM to 6:00 PM Eastern Time
-# - Sends email only at 10:00 AM, 3:00 PM, and 6:00 PM Eastern (or on changes)
+# - Hourly checks from 9:00 AM to 7:00 PM Eastern Time (11 checks per day)
+# - One scheduled email at 1:00 PM ET (any change triggers an extra email)
 #
 # DST handling: these UTC times are correct during EDT (UTC-4), which runs
 # mid-March through early November. When DST flips back to EST (UTC-5) in
@@ -14,31 +14,17 @@ name: MISO ERAS Monitor
 
 on:
   schedule:
-    # ----- 9:00 AM ET (check only) -----
-    - cron: "0 13 * * *"
-    - cron: "30 13 * * *"
-    # ----- 10:00 AM ET (EMAIL) -----
-    - cron: "0 14 * * *"
-    # ----- 10:30 AM - 2:30 PM ET (checks only) -----
-    - cron: "30 14 * * *"
-    - cron: "0 15 * * *"
-    - cron: "30 15 * * *"
-    - cron: "0 16 * * *"
-    - cron: "30 16 * * *"
-    - cron: "0 17 * * *"
-    - cron: "30 17 * * *"
-    - cron: "0 18 * * *"
-    - cron: "30 18 * * *"
-    # ----- 3:00 PM ET (EMAIL) -----
-    - cron: "0 19 * * *"
-    # ----- 3:30 PM - 5:30 PM ET (checks only) -----
-    - cron: "30 19 * * *"
-    - cron: "0 20 * * *"
-    - cron: "30 20 * * *"
-    - cron: "0 21 * * *"
-    - cron: "30 21 * * *"
-    # ----- 6:00 PM ET (EMAIL) -----
-    - cron: "0 22 * * *"
+    - cron: "0 13 * * *"   # 9:00 AM ET (check only)
+    - cron: "0 14 * * *"   # 10:00 AM ET (check only)
+    - cron: "0 15 * * *"   # 11:00 AM ET (check only)
+    - cron: "0 16 * * *"   # 12:00 PM ET (check only)
+    - cron: "0 17 * * *"   # 1:00 PM ET (EMAIL)
+    - cron: "0 18 * * *"   # 2:00 PM ET (check only)
+    - cron: "0 19 * * *"   # 3:00 PM ET (check only)
+    - cron: "0 20 * * *"   # 4:00 PM ET (check only)
+    - cron: "0 21 * * *"   # 5:00 PM ET (check only)
+    - cron: "0 22 * * *"   # 6:00 PM ET (check only)
+    - cron: "0 23 * * *"   # 7:00 PM ET (check only)
   workflow_dispatch:  # manual runs always send an email
 
 permissions:
@@ -49,7 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show timing context
-        id: context
         run: |
           echo "UTC time:     $(date -u)"
           echo "Eastern time: $(TZ='America/New_York' date)"
@@ -59,7 +44,7 @@ jobs:
       - name: Decide whether to send email
         id: should_email
         run: |
-          # Email-time cron schedules (10am, 3pm, 6pm ET in UTC during EDT).
+          # Email-time cron schedule (1pm ET = 17:00 UTC during EDT).
           # If the run was manually triggered, always email.
           # If a change is detected, the script emails regardless of this flag.
           SCHEDULE='${{ github.event.schedule }}'
@@ -67,10 +52,8 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ]; then
             echo "Manual run — will email."
             echo "send_email=true" >> "$GITHUB_OUTPUT"
-          elif [ "$SCHEDULE" = "0 14 * * *" ] \
-            || [ "$SCHEDULE" = "0 19 * * *" ] \
-            || [ "$SCHEDULE" = "0 22 * * *" ]; then
-            echo "Scheduled email time — will email."
+          elif [ "$SCHEDULE" = "0 17 * * *" ]; then
+            echo "Scheduled email time (1pm ET) — will email."
             echo "send_email=true" >> "$GITHUB_OUTPUT"
           else
             echo "Silent check — only emails if changes detected."
@@ -102,7 +85,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Add files individually so a missing file doesn't fail the whole step.
-          # (state.json may not exist on the very first run after upgrade.)
           for f in monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json; do
             if [ -f "$f" ]; then
               git add "$f"
