@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-05-15T15:09:43.673839+00:00",
+  "captured_at": "2026-05-16T14:19:06.434118+00:00",
   "source_last_updated": "5/12/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
@@ -18602,36 +18602,6 @@
       "JTIQ Commitment": null,
       "Cause of Delay": null,
       "id": "GEN-2019-016"
-    },
-    {
-      "Generation Interconnection Number": "GEN-2019-012",
-      "IFS Queue Number": null,
-      "Current Cluster": "DISIS-2019-001",
-      "Cluster Group": "04 SOUTHEAST",
-      "Nearest Town or County": "Woodward",
-      "State": "OK",
-      "TO at POI": "OGE",
-      "In-Service Date": "5/1/2023",
-      "Commercial Operation Date": "5/1/2027",
-      "Cessation Date": null,
-      "Original Generator Commercial Op Date": null,
-      "Capacity": "200",
-      "MAX Summer MW": "200",
-      "MAX Winter MW": "200",
-      "Service Type": "ER/NR",
-      "Requested Maximum Injection Capability (MW)": "0",
-      "Requested Network Resource Deliverability (MW)": "0",
-      "Nameplate Capacity": "0",
-      "Generation Type": "Battery/Storage",
-      "Fuel Type": null,
-      "Substation or Line": "Woodward 345kV substation",
-      "Request Received": "5/22/2019",
-      "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
-      "JTIQ Participant": "N/A",
-      "JTIQ Commitment": null,
-      "Cause of Delay": null,
-      "id": "GEN-2019-012"
     },
     {
       "Generation Interconnection Number": "GEN-2019-011",
