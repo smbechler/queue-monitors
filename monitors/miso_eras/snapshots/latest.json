@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-05-19T00:04:40.583877+00:00",
+  "captured_at": "2026-05-19T16:19:32.357163+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
@@ -29,7 +29,6 @@
       "Location of Need": null,
       "Carve Out Requested": null,
       "Non-Confidential Summary": null,
-      "": null,
       "id": "100016"
     },
     {
@@ -59,7 +58,6 @@
       "Location of Need": "Otter Tail County, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The 75 MW Hoot Lake Battery Energy Storage System is serving the identified need from our MN Integrated Resource Plan and meeting the 20-75 MW of Ordered battery procurement. The need identified in our Integrated Resource Plan is in Otter Tail County, Minnesota, LRZ1.",
-      "": null,
       "id": "100014"
     },
     {
@@ -89,7 +87,6 @@
       "Location of Need": "Rice County, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Faribault Energy Park, located in Rice County, Minnesota is located in LRZ 1. Faribault Energy Park currently has a 300 MW interconnection agreement. We are planning to upgrade the gas turbine at the plant, which will result in increased output. This increased output will exceed the limits of the current interconnection agreement. We are requesting an additional 60 MW of interconnect capacity to allow for upgrading the gas turbine. The total interconnection would be 360 MW if this application is approved as requested. This additional transmission capacity would serve load within LRZ 1. The need is identified in MMPA's most recent integrated resource plan (Minnesota Public Utilities Commission Docket RP-25-302). This identifies a resource deficiency of 50-100 MW, which this project will serve.",
-      "": null,
       "id": "100105"
     },
     {
@@ -119,7 +116,6 @@
       "Location of Need": "Itasca County, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Boswell Solar Project will be built near the Boswell Energy Center in Itasca County, Minnesota. The Boswell Solar project will address the resource adequacy need identified in Minnesota Power\u2019s approved Integrated Resource Plan filed with the Minnesota Public Utilities Commission in docket E015/RP-21-33. This solar project will be serving Minnesota Power\u2019s need of approximately 250-300 MW of solar resources to be located in MISO Local Resource Zone 1. The Minnesota Public Utilities Commission held a Special Meeting on July 24, 2025 where it reviewed the resource adequacy need for various projects, including Boswell Solar, and subsequently issued the Relevant Retail Electric Regulatory Authority Verification Form confirming that Boswell Solar should be considered for the ERAS process in order to meet a resource adequacy and/or reliability need. The project has not requested a carveout through the Expedited Resource Acquisition Study process.",
-      "": null,
       "id": "100048"
     },
     {
@@ -149,7 +145,6 @@
       "Location of Need": "Kenosha County, WI, LRZ 2",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Invenergy is proposing a new 1,186 MW gas fired electric generating facility to be located in Kenosha County, Wisconsin. The project will serve the needs of Wisconsin Electric's customers located in MISO's Local Resource Zone 2 (\"LRZ 2\") as described in the \"Documentation of Need\" of this application. The need identified is approximately 1,750-2,000 MW.",
-      "": null,
       "id": "100076"
     },
     {
@@ -179,7 +174,6 @@
       "Location of Need": "Adair County, IA, LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "MidAmerican Energy\u2019s Orient Energy Center project will be an up to 263 MW, natural gas fueled with fuel oil backup, simple cycle combustion turbine. The project is located in southern Adair County, Iowa and Local Resource Zone 3. Simple cycle natural gas-fired combustion turbines were identified as needed to meet MidAmerican customer\u2019s capacity needs through MidAmerican's Resource Evaluation Study that was completed in 2024 and filed with the Iowa Utilities Commission on November 1, 2024, in Docket M-0156. MidAmerican's capacity deficiency is at least the 250-300 MW level of the ERAS submittal.",
-      "": null,
       "id": "100013"
     },
     {
@@ -209,7 +203,6 @@
       "Location of Need": "Marshall County, IA, LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interstate Power and Light Company (\"IPL\") has filed a request for a 750 MW Combustion Turbine resource located in Marshall County, Iowa. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 3. This need comes to 3,250-3,500 MW. No carve out was requested for this project.",
-      "": null,
       "id": "100085"
     },
     {
@@ -239,7 +232,6 @@
       "Location of Need": "Sangamon County, IL LRZ 4",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Lincoln Capital Land LLC 125 MW solar project is submitting an application into MISO\u2019s ERAS process to address a portion of City Water Light & Power's (\"CWLP\") unmet resource adequacy needs from the closure of a 350-400 MW facility within MISO Zone 4 and CWLP territory.",
-      "": null,
       "id": "100044"
     },
     {
@@ -269,7 +261,6 @@
       "Location of Need": null,
       "Carve Out Requested": null,
       "Non-Confidential Summary": null,
-      "": null,
       "id": "100087"
     },
     {
@@ -299,7 +290,6 @@
       "Location of Need": null,
       "Carve Out Requested": null,
       "Non-Confidential Summary": null,
-      "": null,
       "id": "100103"
     },
     {
@@ -329,7 +319,6 @@
       "Location of Need": "Calumet County, WI LA LRZ 2",
       "Carve Out Requested": null,
       "Non-Confidential Summary": "Invenergy is proposing a new 1203 MW gas fired electric generating facility to be located in Calumet County, Wisconsin. The project will serve the needs of Wisconsin Electric's customers located in MISO's Local Resource Zone 2 (\"LRZ 2\"). This facility will meet 1,203 MW of the 2250 - 2500 MW of need identified.",
-      "": null,
       "id": "100075"
     },
     {
@@ -359,7 +348,6 @@
       "Location of Need": null,
       "Carve Out Requested": null,
       "Non-Confidential Summary": null,
-      "": null,
       "id": "100096"
     },
     {
@@ -389,7 +377,6 @@
       "Location of Need": "St.Charles County, LA LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Louisiana, LLC MW range of need: 2,000-2,250 MW LRZ region: 9 General description of Load Need: The resource adequacy need is being driven by a hyperscale data center. The Waterford 5 unit is one of the three generators proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100061"
     },
     {
@@ -419,7 +406,6 @@
       "Location of Need": "Jefferson County, TX LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Texas, Inc. MW range of need: 1,400-1,650 MW LRZ region: Local Resource Zone 9 General description of Load Need: Forecasted load growth in the region driven primarily by increased residential and industrial customers.",
-      "": null,
       "id": "100057"
     },
     {
@@ -449,7 +435,6 @@
       "Location of Need": "Saint Louis County, MO, LRZ 5",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Union Electric Company d/b/a Ameren Missouri MW range of need: 250-300 MW Location: Sullivan County, Missouri General Description of Load Need: Solar facility serving resource adequacy deficiency identified in Ameren Missouri's 2025 Preferred Resource Plan.",
-      "": null,
       "id": "100051"
     },
     {
@@ -479,7 +464,6 @@
       "Location of Need": "Richland County, LA, LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Louisiana, LLC MW range of need: 2,000-2,250 MW LRZ region: 9 General description of Load Need: The resource adequacy need is being driven by a hyperscale data center. The Franklin Farms units are two of the three generators proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100063"
     },
     {
@@ -509,7 +493,6 @@
       "Location of Need": "Franklin County, IA, LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interstate Power and Light Company (\"IPL\") has filed a request for a 350 MW wind resource located in Franklin County, Iowa. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 3. This need comes to 3,250-3,500 MW. No carve out was requested for this project.",
-      "": null,
       "id": "100071"
     },
     {
@@ -539,7 +522,6 @@
       "Location of Need": "Lincoln County, MO LRZ 5",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Union Electric Company d/b/a Ameren Missouri MW range of need: 250-300 MW Location: Lincoln County, Missouri General Description of Load Need: Battery energy storage facility serving resource adequacy deficiency identified in Ameren Missouri's 2025 Preferred Resource Plan.",
-      "": null,
       "id": "100050"
     },
     {
@@ -569,13 +551,12 @@
       "Location of Need": "Warren County, MS LRZ 10",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Mississippi, LLC MW range of need: 1,000 \u2013 1,300 MW LRZ region: LRZ 10 General Description of Load: The resource adequacy need is being driven by overall load growth, that includes hyperscale data centers. The total load growth projected is 1,000 \u2013 1,300 MW at peak demand. The entire load growth will be located in LRZ 10 in Mississippi. The Vicksburg CCCT (J3583) is one of two generators proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100058"
     },
     {
       "Project Number": "E0026",
       "Application ID": 100035,
-      "Interconnection Customer": "Invenergy Cannon Falls, LLC",
+      "Interconnection Customer": "2028-12-01T00:00:00",
       "Request Status": "Active",
       "Order Submitted": 20,
       "Submission Time": "2025-08-06T09:00:34",
@@ -599,7 +580,6 @@
       "Location of Need": "Goodhue County,MN LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Invenergy Cannon Falls, LLC MW Range of Need: 1,400 \u2013 1,500 MW LRZ region: LRZ 1 (MN, ND, SD, WI and MI) General Description of Load: The project is a 57 MW uprate to the existing Cannon Falls plant's generating capacity in Cannon Falls, Minnesota. The project intends to uprate the net MW at the POI to 414 MW. This project fulfills a need specified in Xcel's IRP. Xcel Energy's letter to the PUC, dated July 22, as part of public Docket No. E002/RP-24-67, where by Xcel states, \"...we request the Commission verify that the resources listed below are consistent with the needs identified by the Commission in our 2024-2040 Upper Midwest Integrated Resource Plan (2024 IRP) and should be considered in the ERAS process...incremental capacity that would result from planned upgrades at the Cannon Falls Energy Center...\" (pg. 1), and \"...As noted above, even with all of the approved firm dispatchable bids in our IRP, we still have 1,400 MW of remaining need in our Five-Year Action Plan. These incremental MWs of firm dispatchable capacity with minimal carbon emissions will help us meet our confirmed need.\u201d (pg 7).",
-      "": null,
       "id": "100035"
     },
     {
@@ -629,14 +609,13 @@
       "Location of Need": "Madison and Warren, MS, LRZ 10",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Mississippi, LLC MW Range of Need: 1,000 \u2013 1,300 MW LRZ region: LRZ 10 General Description of Load Need: The resource adequacy need is being driven by overall load growth, that includes hyperscale data centers. The total load growth projected is 1,000 \u2013 1,300 MW at peak demand. The entire load growth will be located in LRZ 10 in Mississippi. The Lakeover CCCT (J3825) is one of two generators proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100059"
     },
     {
       "Project Number": "E0025",
       "Application ID": 100047,
       "Interconnection Customer": "ALLIANT ENERGY/IPL",
-      "Request Status": "Withdrawn",
+      "Request Status": "Active",
       "Order Submitted": 22,
       "Submission Time": "2025-08-06T09:00:38",
       "Date Withdrawn": "2025-11-12T00:00:00",
@@ -659,7 +638,6 @@
       "Location of Need": "Linn County, IA LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interstate Power and Light Company (\"IPL\") has filed a request for a 950 MW Combustion Turbine resource located in Linn County, Iowa. This project is needed to meet future resource adequacy requirements in MISO's LRZ 3. This need comes to 3,350-3,500 MW. No carve out was requested for this project.",
-      "": null,
       "id": "100047"
     },
     {
@@ -689,7 +667,6 @@
       "Location of Need": "Monroe County, LRZ 7",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The DTE Electric IRP filing (MPSC Docket No. U-21193) approved by the Michigan Public Service Commission (\"MPSC\") in 2023 demonstrates that DTE has a Zone 7 resource adequacy deficiency of 1,500-1750 MW as a result of the retirement of Monroe Units 3 and 4. The MPSC approved DTE's proposed course of action in the IRP, which includes 780 MW of storage capacity by 2030. The Monroe ERAS project has requested 350 MW of interconnection service in Zone 7, meeting the 150% requirement.",
-      "": null,
       "id": "100073"
     },
     {
@@ -719,7 +696,6 @@
       "Location of Need": "Freeborn, MN LRZ 2",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Wisconsin Power and Light Company (\"WPL\") has filed a request for a 153 MW wind resource located in Franklin County, MN. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 2. This need comes to over 1,000-1,100 MW. No carve out was requested for this project.",
-      "": null,
       "id": "100099"
     },
     {
@@ -749,7 +725,6 @@
       "Location of Need": "Sheboygan, WI LRZ 2",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Wisconsin Power and Light Company (WPL) has filed a request for a 150 MW combustion turbine resource addition (450 MW total at the point of interconnection) located in Sheboygan County, WI. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 2. This need comes to over 1,000 -1,100 MW.",
-      "": null,
       "id": "100067"
     },
     {
@@ -779,7 +754,6 @@
       "Location of Need": "Arenac, MI, LRZ 7",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "DTE Electric is submitting the Au Gres Solar Project for consideration in MISO\u2019s first ERAS cycle when it opens on August 6, 2025. The Au Gres Solar Park Project will be sited in Arenac County. The project is aligned with DTE Electric\u2019s 2022 IRP settlement agreement and the Proposed Course of Action (\u201cPCA\u201d), which was approved as the most reasonable and prudent means of meeting the Company\u2019s energy and capacity needs over the five-year, 10-year, and 15-year time horizons (July 26, 2023, Order in U-21193). The DTE Electric IRP filing (MPSC Docket No. U-21193) approved by the Michigan Public Service Commission in 2023 demonstrates that DTE has a Zone 7 resource adequacy deficiency of 1,500-1750 MW as a result of the retirement of Monroe Units 3 and 4. The MPSC approved DTE's proposed course of action in the IRP, which includes 3,400 MW of renewables capacity by 2030. The Au Gres Solar project has requested 175 MW of interconnection service in Zone 7, meeting the 150% requirement.",
-      "": null,
       "id": "100069"
     },
     {
@@ -809,7 +783,6 @@
       "Location of Need": "Monroe, MI, LRZ 7",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "DTE Electric is submitting the FERMI Storage Project for consideration in MISO\u2019s first ERAS cycle when it opens on August 6, 2025. The Fermi Storage Project will be sited in Monroe County. The project will connect to the substation being constructed in Monroe County and is anticipated to provide 200 MW of battery storage nameplate capacity. The project is aligned with DTE Electric\u2019s 2022 IRP settlement agreement and the Proposed Course of Action (\u201cPCA\u201d), which was approved as the most reasonable and prudent means of meeting the Company\u2019s energy and capacity needs over the five-year, 10-year, and 15-year time horizons (July 26, 2023, Order in U-21193). The DTE Electric IRP filing (MPSC Docket No. U-21193) approved by the Michigan Public Service Commission in 2023 demonstrates that DTE has a Zone 7 resource adequacy deficiency of 1,500-1,750 MW as a result of the retirement of Monroe Units 3 and 4. The MPSC approved DTE's proposed course of action in the IRP, which includes 780 MW of storage capacity by 2030. The Fermi ERAS project has requested 200 MW of interconnection service in Zone 7, meeting the 150% requirement.",
-      "": null,
       "id": "100072"
     },
     {
@@ -839,7 +812,6 @@
       "Location of Need": "Winnebago, WI , LRZ2",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Wisconsin Power and Light Company (WPL) has filed a request for a 150 MW combustion turbine resource addition (450 MW total at the point of interconnection) located in Winnebago County, WI. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 2. This need comes to over 1,000 - 1,100 MW.",
-      "": null,
       "id": "100068"
     },
     {
@@ -869,7 +841,6 @@
       "Location of Need": "Salinac, MI, LRZ 7",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Deckerville Solar Park Project will be sited in Sanilac County, Michigan. The project will connect to the Deckerville Solar Park substation being constructed in Sanilac County and is anticipated to provide 200 MW of nameplate capacity. The project was selected to fulfill demand for the amended and restated Special Contract between DTE Electric and Ford Motor Company (\u201cFord\u201d) under DTE Electric\u2019s voluntary green pricing (\u201cVGP\u201d) program that was approved by the Commission on December 19, 2024 in Case No. U-21285. The DTE Electric IRP filing (MPSC Docket No. U-21193) approved by the Michigan Public Service Commission in 2023 demonstrates that DTE has a Zone 7 resource adequacy deficiency of 1,500-1750 MW as a result of the retirement of Monroe Units 3 and 4. The MPSC approved DTE's proposed course of action in the IRP, which includes 3,400 MW of renewables capacity by 2030. The Deckerville Solar project has requested 200 MW of interconnection service in Zone 7, meeting the 150% requirement.",
-      "": null,
       "id": "100081"
     },
     {
@@ -899,7 +870,6 @@
       "Location of Need": "Anderson, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "IMPA, as a load serving entity, is seeking an Expedited Resource Addition Study to serve its MISO Zone 6 load. The planned unit is a 260 MW dual fuel fired combustion turbine located in Madison County Indiana. IMPA\u2019s most recent Integrated Resource Plan identified a resource need of 250 MW. IMPA received a Certificate of Public Convenience and Necessity from the Indiana Utility Regulatory Commission recognizing IMPA\u2019s need for the unit to serve its load and authorizing construction of the unit on April 9, 2025.",
-      "": null,
       "id": "100017"
     },
     {
@@ -929,7 +899,6 @@
       "Location of Need": "Linn, IA, LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Interconnection Customer (\u201cNextEra Energy Resources Development, LLC\u201d or \u201cNER\u201d) has filed for a 646 MW generating facility sited in Linn County, Iowa. The Project is located in MISO Local Resource Zone 3 and intends to address resource adequacy needs for approximately 600-700 MW in the same Local Resource Zone as the generating facility, as described in the attached RERRA verification letter.",
-      "": null,
       "id": "100021"
     },
     {
@@ -959,7 +928,6 @@
       "Location of Need": "Tangipahoa, LA, LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Amite Energy Storage II (under NextEra Energy Resources Development, LLC) is a 200 MW, 4-hour battery energy storage system in Tangipahoa Parish, LA. The project is located in MISO Zone 9 within the transmission and generation constrained Amite South load pocket, and will support DEMCO\u2019s and SLEMCO\u2019s resource capacity needs in MISO Zone 9 obligated by the Louisiana Public Service Commission\u2019s Minimum Capacity Obligation (\"MCO\"). The MCO requires SLEMCO and DEMCO to procure 90% of their MISO PRMR four years in advance of each Planning Resource Auction, and this 200 MW storage project will directly serve that obligation, as DEMCO and SLEMCO each have a 100-200 MW need to fulfill.",
-      "": null,
       "id": "100070"
     },
     {
@@ -989,7 +957,6 @@
       "Location of Need": "Oliver and Morton County, ND LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Red Butte Wind is an approximately 426 MW wind project in Morton and Oliver Counties, North Dakota. The project will be interconnecting in MISO Load Resource Zone 1. This location is consistent with the location of GRE's load growth as outlined in their Integrated Resource Plan (\"IRP\") filed in 2023. The IRP added more than 1 GW of wind by 2032 to enable GRE's Preferred Plan guided by GRE\u2019s load forecasts, capacity expansion modeling, and projected capacity position.",
-      "": null,
       "id": "100030"
     },
     {
@@ -1019,7 +986,6 @@
       "Location of Need": "Benton, MN, LRZ1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Benton Solar II is a 100 MW solar project in Benton County, MN. The project is located in MISO Zone 1 and will meet the Zone 1 load needs outlined by Xcel Energy\u2019s 2024-2040 Upper Midwest Integrated Resource Plan (\"2024 IRP\"). The 2024 IRP identified the need for 400-500 MW of solar to support Xcel Energy\u2019s plans to retire all of their coal plants by 2030.",
-      "": null,
       "id": "100027"
     },
     {
@@ -1049,7 +1015,6 @@
       "Location of Need": "Reading, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Nobles BESS project is a proposed 300 MW project located at 19469 McCall Avenue in Reading, Minnesota (Nobles County). The project seeks 300 MW of Network Resource Interconnection Service and targets a COD of 8/6/2028. It is intended to support near-term system reliability needs through fast response capacity. The 300 MW Nobles Energy Storage project is required to help meet the remaining approximately 1,350-1500 MW need in Xcel Energy\u2019s 2024-2040 Integrated Resource Plan. The additional generation is needed in all NSP load areas, including NSP.NSP. The load resides in Local Resource Zone 1. The generating facility is interconnected to the Nobles 345 kV substation located in Nobles County, Minnesota.",
-      "": null,
       "id": "100088"
     },
     {
@@ -1079,7 +1044,6 @@
       "Location of Need": "Olmsted, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The proposed Sandhill Energy Storage project is a 200 MW/800 MWh Battery Energy Storage System (BESS) located in Olmsted County, Minnesota. The project is meeting Xcel Energy\u2019s 2024-2040 IRP which identified 800-900 MW of need.",
-      "": null,
       "id": "100095"
     },
     {
@@ -1109,7 +1073,6 @@
       "Location of Need": "Boone, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Brickyard Energy Storage 300 MW, 4 hour battery energy storage system in Boone County, IN. The project is located in MISO Zone 6, will interconnect as a line-tap to AES Indiana's Hortonville - Whitestown 345 Line, and serve a peak demand of up to 200MW. The project will meet the load needs identified by AES Indiana's ongoing IRP. The 2025 IRP initial stakeholder meetings have identified the need for up to 700-800 MW of standalone storage by 2028 to support AES Indiana's plans for their projected hyperscaler data center load.",
-      "": null,
       "id": "100026"
     },
     {
@@ -1139,7 +1102,6 @@
       "Location of Need": "SanJacinto, TZ, LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Texas, Inc. MW range of need the ERAS project is addressing: 1,400 \u2013 1,500 MW LRZ region: Local Resource Zone 9 General Description of Load Need: Forecasted load growth in the region driven primarily by increased residential and industrial customers.",
-      "": null,
       "id": "100060"
     },
     {
@@ -1169,7 +1131,6 @@
       "Location of Need": "Benton, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Benton Energy Storage II is a 300 MW, 4 hour battery energy storage system in Benton County, Minnesota. The project is located in MISO Zone 1 and will meet the Zone 1 load needs outlined by Xcel Energy\u2019s 2024-2040 Upper Midwest Integrated Resource Plan (\"2024 IRP\"). The 2024 IRP identified the need for 500 - 600 MW of standalone storage to support Xcel Energy\u2019s plans to retire all of their coal plants by 2030.",
-      "": null,
       "id": "100028"
     },
     {
@@ -1199,7 +1160,6 @@
       "Location of Need": "Sherbune, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Sherco South BESS project is a proposed 300 MW/1,200 MWh project located at 13999 Industrial Blvd in Becker, Minnesota (Sherburne County). The project seeks 300 MW of Network Resource Interconnection Service and targets a COD of 11/26/2027. It is intended to support 300 - 400 MW of additional generation needed in the 2024-2040 Integrated Resource Plan.",
-      "": null,
       "id": "100090"
     },
     {
@@ -1229,7 +1189,6 @@
       "Location of Need": "Jasper, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "NIPSCO has submitted two combined cycle power plants (\u201cCCGTs\u201d) (total of approximately 2,639 MW) at NIPSCO\u2019s Schahfer site (\u201cSchahfer Project\u201d) to the ERAS process. The Schahfer Project will address a resource adequacy deficiency within LRZ 6 for dispatchable resources, as supported by NIPSCO with its 2024 Integrated Resource Plan wherein NIPSCO anticipates up to 2,550-2,800 MW of additional load, for which the expedited review processes are necessary for resource adequacy to serve growing data center, advanced manufacturing, and other economic development project load requirements.",
-      "": null,
       "id": "100046"
     },
     {
@@ -1259,7 +1218,6 @@
       "Location of Need": "Lake, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "NIPSCO has submitted for 500 MW of dispatchable batteries at NIPSCO\u2019s Mitchell site (\u201cMitchell Project\u201d) to the ERAS process. The Mitchell Project will address a resource adequacy deficiency within LRZ 6 for dispatchable resources, as supported by NIPSCO with its 2024 Integrated Resource Plan wherein NIPSCO anticipates up to 2,500-2,800 MW of additional load, for which the expedited review processes are necessary for resource adequacy to serve growing data center, advanced manufacturing, and other economic development project load requirements.",
-      "": null,
       "id": "100054"
     },
     {
@@ -1289,7 +1247,6 @@
       "Location of Need": "Porter, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "NIPSCO has submitted an 859 MW combined cycle power plant (\u201cCCGT\u201d) at NIPSCO\u2019s Malden site (\u201cMalden Project\u201d) to the ERAS process. The Malden Project will address a resource adequacy deficiency within LRZ 6 for dispatchable resources, as supported by NIPSCO with its 2024 Integrated Resource Plan wherein NIPSCO anticipates up to 2,550-2,800 MW of additional load, for which the expedited review processes are necessary for resource adequacy to serve growing data center, advanced manufacturing, and other economic development project load requirements.",
-      "": null,
       "id": "100055"
     },
     {
@@ -1319,7 +1276,6 @@
       "Location of Need": "Saginar, MI, LRZ 7",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The project is responding to a resource adequacy need of 300-350 MW under the Consumers Energy 2024 RFP. The project is located near Tittabawassee in Saginaw County, Michigan, which is in MISO Zone 7. This storage project is supplying capacity under the Consumers Energy 2024 RFP. No carveout was requested for this project.",
-      "": null,
       "id": "100032"
     },
     {
@@ -1349,7 +1305,6 @@
       "Location of Need": "Olmsted, MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "As part of the Rochester Public Utilities (RPU) 2030 Power Supply Resource Plan, firm dispatchable capacity from Mount Simon Station, a natural gas turbine generator, will meet a resource adequacy need/load growth of 300-350 MW in 2030 and will provide nearly 16% of RPU's estimated summer capacity obligation in 2030. The facility is designed to produce 49.9 MW at the Westside 161 kV substation POI. It located in Olmsted County, Minnesota.",
-      "": null,
       "id": "100089"
     },
     {
@@ -1379,7 +1334,6 @@
       "Location of Need": "Brookings, SD, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interconnection Customer: Basin Electric Power Cooperative Megawatt Range: 200 - 250 MW Location: Brookings County, South Dakota Description of need: Simple Cycle Natural Gas Turbine serving a Resource Adequacy capacity need",
-      "": null,
       "id": "100122"
     },
     {
@@ -1409,7 +1363,6 @@
       "Location of Need": "Porter, IN, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "NIPSCO submitted a 600 MW Battery Energy Storage System (\u201cBESS\u201d) at NIPSCO\u2019s Malden site (\u201cMalden BESS Project\u201d) to the ERAS process. The Malden BESS Project will address a resource adequacy deficiency within LRZ 6 for dispatchable resources, as supported by NIPSCO with its 2024 Integrated Resource Plan wherein NIPSCO anticipates up to 2,550-2,800 MW of additional load in the reference case. NIPSCO has now surpassed the lower reference case. The Malden BESS Project will address additional large loads that moves NIPSCO from the IRP reference case into the 8,800 MW high load scenario, for which the expedited review processes are necessary for resource adequacy to serve growing data center, advanced manufacturing, and other economic development project load requirements.",
-      "": null,
       "id": "100120"
     },
     {
@@ -1439,7 +1392,6 @@
       "Location of Need": "Richlan Parish, LA LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Louisiana, LLC MW range of need: 2,000 - 2,250 MW LRZ region: 9 General description of Load Need: The resource adequacy need is being driven by a hyperscale data center. The Richland Parish generators are proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100144"
     },
     {
@@ -1469,7 +1421,6 @@
       "Location of Need": "Richlan Parish, LA LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Louisiana, LLC MW range of need: 2,000 - 2,250 MW LRZ region: 9 General description of Load Need: The resource adequacy need is being driven by a hyperscale data center. The Richland Parish generators are proposed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100145"
     },
     {
@@ -1499,7 +1450,6 @@
       "Location of Need": "Calcasieu Parish, LA LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer: Entergy Louisiana, LLC MW Range of Need: 1,750 \u2013 2,000 MW LRZ region: Local Resource Zone 9 General Description of Load Need: The driver of the resource is to provide generation to support load growth and future unit deactivations. In 2024, ELL initiated a request for proposal to acquire up to 2,000 MW of Capacity, Capacity-Related Benefits (such as ZRCs and capacity-related benefits, energy, and other credits), energy, Other Electric Products, and Environmental Attributes from a single generation resource located in MISO Local Resource Zone-9 (\u201cLRZ-9\u201d).",
-      "": null,
       "id": "100146"
     },
     {
@@ -1523,13 +1473,12 @@
       "Generating Facility": "Combined Cycle",
       "Post GIA Status": "Not started",
       "Negotiated In Service Date": null,
-      "Requested ERIS MW": 446.58,
+      "Requested ERIS MW": 756,
       "Requested NRIS MW": 756,
       "MW Range of Need": "700-800",
       "Location of Need": "Rapides Parish, LA LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Cleco Power has filed a request for a 756 MW CCGT to meet the identified need of up to 700-800 MWs of dispatchable generation in our IRP. The project is located in Rapides Parish, LA in LRZ9. No carve out is applicable for this project.",
-      "": null,
       "id": "100157"
     },
     {
@@ -1559,7 +1508,6 @@
       "Location of Need": "Cerro Gordo, IA LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interstate Power and Light Company (IPL) has filed a request for a 750 MW Combustion Turbine resource located in Cerro Gordo County, Iowa. This project is needed to meet future resource adequacy requirements in MISO\u2019s LRZ 3. This need comes to 3,250-3,500 MW. No carve out has been requested for this project.",
-      "": null,
       "id": "100187"
     },
     {
@@ -1589,7 +1537,6 @@
       "Location of Need": "Pointe Coupee, LRZ 9",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Developer Entergy Louisiana LLC MW range of need >2000MW LRZ region where the ERAS project is located. Local Resource Zone 9: The Point Coupee units are a portion of the generators propsed to serve the outlined resource adequacy need.",
-      "": null,
       "id": "100190"
     },
     {
@@ -1619,7 +1566,6 @@
       "Location of Need": "Sullivan County, LRZ 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Hallador Power is proposing a new 515 MW natural gas fired electric generating facility to be located in Sullivan County, Indiana at the site of the existing Merom Generation Station. The project will serve the identified need in MISO's Local Resource Zone 6 (\"LRZ 6\").",
-      "": null,
       "id": "100196"
     },
     {
@@ -1649,7 +1595,6 @@
       "Location of Need": "Linn County, IA LRZ 3",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Interstate Power and Light Company (\"IPL\") has filed a request for a 950 MW Combustion Turbine resource located in Linn County, Iowa. This project is needed to meet future resource adequacy requirements in MISO's LRZ 3. This need comes to 3,350-3,500 MW. No carve out was requested for this project.",
-      "": null,
       "id": "100200"
     },
     {
@@ -1679,7 +1624,6 @@
       "Location of Need": "Bureau County, IL LRZ 4 and 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Bluejacket Solar will be located in MISO\u2019s Local Resource Zone (LRZ) 4. It will serve loads referenced in Hoosier Energy\u2019s most recent IRP, which has identified 200MW - 600MW of capacity needed in MISO LRZs 4 and 6.",
-      "": null,
       "id": "100198"
     },
     {
@@ -1709,7 +1653,6 @@
       "Location of Need": "Greene County, IL LRZ 4 and 6",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "Pumpkin Patch will be located in MISO\u2019s Local Resource Zone (LRZ) 4. It will serve loads referenced in Hoosier Energy\u2019s most recent IRP, which has identified 200MW - 600MW of capacity needed in MISO LRZs 4 and 6.",
-      "": null,
       "id": "100197"
     },
     {
@@ -1739,7 +1682,6 @@
       "Location of Need": "Sullivan County, LRZs 4 & 6",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Merom Storage is a 400 MW, 4 hour battery energy storage system in Sullivan County, IN. The project is in MISO Zone 6, will interconnect to Hoosier Energy\u2019s Merom 345 kV substation, and serve a peak demand in range of 300 to 400 MW. The project will meet the load needs identified by Hoosier/Solvenz for their 2028 projected hyperscaler data center load.",
-      "": null,
       "id": "100245"
     },
     {
@@ -1769,7 +1711,6 @@
       "Location of Need": "Livingstone Parish County",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Steamboat Energy Storage is a 500 MW, 4-hour battery energy storage system in Livingston Parish, LA interconnecting into Entergy\u2019s Willow Glen to Coly 500kV system. The project is in MISO Zone 9, within the transmission and generation constrained Amite South load pocket. The project will support the new, incremental load of a commercial entity in need of 330-360 MW of capacity, and this 500 MW storage project will directly serve a portion of the long-term resource adequacy needs of the load.",
-      "": null,
       "id": "100259"
     },
     {
@@ -1799,14 +1740,13 @@
       "Location of Need": "Vigo County IN, LRZ 6",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Sandcut Storage is a 275 MW, 4 hour battery energy storage system in Vigo County, IN. The project is in MISO Zone 6, will interconnect as a Line-Tap to Duke Energy Indiana\u2019s Wabash River-Whitesville South 230 kV Line, and serve a peak demand in range of 200 to 300 MW. The project will meet load needs identified by Hoosier/Solvenz for their 2030 projected hyperscaler data center load.",
-      "": null,
       "id": "100248"
     },
     {
       "Project Number": "E0058",
       "Application ID": 100186,
       "Interconnection Customer": "Little Rock Wind Project, LLC",
-      "Request Status": "Under review",
+      "Request Status": "Active",
       "Order Submitted": 61,
       "Submission Time": "2026-02-18:15:02",
       "Date Withdrawn": null,
@@ -1829,8 +1769,152 @@
       "Location of Need": "Nobes County MN, LRZ 1",
       "Carve Out Requested": "N/A",
       "Non-Confidential Summary": "The Little Rock Wind Project is a proposed 300 MW project located in Nobles County, Minnesota. The project seeks 300 MW of Network Resource Interconnection Service and targets a COD of 2/01/2029. The project will help meet the needs identified in Xcel Energy's 2024-2040 Upper Midwest Integrated Resource Plan. The additional generation is needed in all NSP load areas, including NSP.NSP. The load resides in Local Resource Zone 1. The generating facility will be interconnected on the Nobles to Split Rock 345 kV transmission line in Nobles County, Minnesota.",
-      "": null,
       "id": "100186"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100381,
+      "Interconnection Customer": "D/B/A Missouri Electric Commission",
+      "Request Status": "Under review",
+      "Order Submitted": 62,
+      "Submission Time": "2026-04-10-20:21",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2029-04-01T00:00:00",
+      "Transmission Owner": "Ameren Missouri",
+      "County": null,
+      "State": "MO",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "Hannibal MJMEUC",
+      "Max Summer MW": 86,
+      "Max Winter MW": 86,
+      "Fuel Type": "Gas, Storage",
+      "Generating Facility": "Gas Turbine",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 86,
+      "Requested NRIS MW": 86,
+      "MW Range of Need": "100-200",
+      "Location of Need": "Hannibal Fulton, MO LRZ",
+      "Carve Out Requested": "N/A",
+      "Non-Confidential Summary": "2x43 MW (winter rating) combustion-turbine generators necessary to meet resource adequacy requirements for MJMEUC. Project will be developed and owned by MJMEUC",
+      "id": "100381"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100292,
+      "Interconnection Customer": "DOUBLEC Energy Center LLC",
+      "Request Status": "Under review",
+      "Order Submitted": 63,
+      "Submission Time": "2026-05-06-21:41",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2029-05-06T00:00:00",
+      "Transmission Owner": "Entergy Arkansas",
+      "County": "Crittenden",
+      "State": "AR",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "KEO-West Memphis 500kV Line",
+      "Max Summer MW": 826.39,
+      "Max Winter MW": 826.39,
+      "Fuel Type": "Solar",
+      "Generating Facility": "Battery Storage",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 400,
+      "Requested NRIS MW": 400,
+      "MW Range of Need": "400-500",
+      "Location of Need": "Crittenden County AR LRZ8",
+      "Carve Out Requested": "N/A",
+      "Non-Confidential Summary": "DOUBLEC Energy Center is located in Crittenden County, Arkansas. The energy center will serve long term resource adequacy of new large loads in LRZ8. This is a solar and a BESS hybrid projec, interconnecting to Entergy\u2019s West Memphis to Keo 500 kV system.",
+      "id": "100292"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100305,
+      "Interconnection Customer": "DOUBLEC Energy Center LLC",
+      "Request Status": "Under review",
+      "Order Submitted": 64,
+      "Submission Time": "2026-05-06-22:00",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2029-02-01T00:00:00",
+      "Transmission Owner": "Entergy Arkansas",
+      "County": 100,
+      "State": "AR",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "KEO-West Memphis 500kV Line",
+      "Max Summer MW": 421.388,
+      "Max Winter MW": 421.388,
+      "Fuel Type": "Battery Storage",
+      "Generating Facility": "Battery Storage",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 400,
+      "Requested NRIS MW": 400,
+      "MW Range of Need": "400-500",
+      "Location of Need": "Crittenden County AR LRZ8",
+      "Carve Out Requested": "N/A",
+      "Non-Confidential Summary": "DOUBLEC Energy Center 2 is located in Crittenden County, Arkansas. The energy center will serve long term resource adequacy of new large loads in LRZ8. This is a BESS project, interconnecting to Entergy\u2019s West Memphis to Keo 500 kV system.",
+      "id": "100305"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100445,
+      "Interconnection Customer": "Trotman Energy Center LLC",
+      "Request Status": "Under review",
+      "Order Submitted": 65,
+      "Submission Time": "2006-5-08-18:39",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2028-10-01T00:00:00",
+      "Transmission Owner": "IPL/AES",
+      "County": "Sullivan",
+      "State": "IN",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "Sullivan-Petersburg 345kV",
+      "Max Summer MW": 510,
+      "Max Winter MW": 510,
+      "Fuel Type": "Gas",
+      "Generating Facility": "Gas Combustion Turbines",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 400,
+      "Requested NRIS MW": 400,
+      "MW Range of Need": "400-500",
+      "Location of Need": "Sullivan County, LRZ 6",
+      "Carve Out Requested": "IPP",
+      "Non-Confidential Summary": "Trotman Energy Center will consist of two natural gas combustion turbines with dual fuel capability located in Sullivan County, Indiana. The project will serve a large load also located in Sullivan County in MISO's Local Resource Zone 6 (\"LRZ 6\") as described in the \"Documentation of Need\" of this application.",
+      "id": "100445"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100465,
+      "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
+      "Request Status": "Under review",
+      "Order Submitted": 66,
+      "Submission Time": "2026-05-11-20:17",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2028-11-11T00:00:00",
+      "Transmission Owner": "Big Rivers Electric Corporation",
+      "County": "McCracken",
+      "State": "KY",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "Hopkins to Reid 161 kV",
+      "Max Summer MW": 230.64,
+      "Max Winter MW": 230.64,
+      "Fuel Type": "Battery Storage",
+      "Generating Facility": "Battery Storage",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 230.64,
+      "Requested NRIS MW": 230.64,
+      "MW Range of Need": "200-300",
+      "Location of Need": "McCracken County -Ky",
+      "Carve Out Requested": "IPP",
+      "Non-Confidential Summary": "Tradewater Energy Storage, with off-taker Brookfield Infrastructure Group, LLC will address a commercial need for new load in McCracken County, Kentucky. This 225 MW of storage project is intended to come online for the MISO 2028/2029 Planning Year, to address a portion of the long-term resource adequacy deficiency that Brookfield Infrastructure Group, LLC would cause by coming online in the same Planning Year.",
+      "id": "100465"
     }
   ]
 }
