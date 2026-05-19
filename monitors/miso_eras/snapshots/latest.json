@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-05-19T20:44:55.823953+00:00",
+  "captured_at": "2026-05-19T21:21:12.249825+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
@@ -615,7 +615,7 @@
       "Project Number": "E0025",
       "Application ID": 100047,
       "Interconnection Customer": "ALLIANT ENERGY/IPL",
-      "Request Status": "Active",
+      "Request Status": "Withdrawn",
       "Order Submitted": 22,
       "Submission Time": "2025-08-06T09:00:38",
       "Date Withdrawn": "2025-11-12T00:00:00",
