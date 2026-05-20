@@ -1,0 +1,64 @@
+name: FERC eLibrary Monitor
+
+# Weekly run, Fridays at 1:00 PM Eastern Time.
+# Always emails — even when no new matches — as a heartbeat.
+#
+# DST handling: during EDT (UTC-4), 1pm ET = 17:00 UTC.
+# During EST (UTC-5), 1pm ET = 18:00 UTC.
+# Change "17" to "18" when DST flips back in November.
+
+on:
+  schedule:
+    # Cron fields: minute hour day-of-month month day-of-week
+    # 5 = Friday
+    - cron: "0 17 * * 5"   # 1:00 PM EDT every Friday (change to 18 in winter)
+  workflow_dispatch:  # allow manual runs
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Show timing context
+        run: |
+          echo "UTC time:     $(date -u)"
+          echo "Eastern time: $(TZ='America/New_York' date)"
+          echo "Day of week:  $(TZ='America/New_York' date +%A)"
+          echo "Trigger:      ${{ github.event_name }}"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitor
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
+          MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
+        run: python monitors/ferc_elibrary/monitor.py
+
+      - name: Commit updated seen-set
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -f "monitors/ferc_elibrary/snapshots/seen.json" ]; then
+            git add monitors/ferc_elibrary/snapshots/seen.json
+          else
+            echo "No seen.json file to commit (script may have failed)."
+          fi
+          if git diff --cached --quiet; then
+            echo "No seen-set changes to commit."
+          else
+            git commit -m "ferc_elibrary: seen-set update"
+            git push
+          fi
