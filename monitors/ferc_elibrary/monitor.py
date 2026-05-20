@@ -510,25 +510,13 @@ def _doc_list(docs: list[dict[str, Any]]) -> str:
         if isinstance(filed, str) and "T" in filed:
             filed = filed.split("T")[0]
         description = doc.get("description") or "(no description)"
-        doc_type = doc.get("document_type") or "(unknown type)"
-        submitter = doc.get("submitter") or ""
-        matched = doc.get("matched_keywords") or []
         link = DOC_INFO_URL.format(accession=accession)
 
         items.append(
             f"<li style='margin-bottom:14px;'>"
             f"<a href='{link}' style='font-weight:600;'>{_esc(docket_display)}</a> · "
-            f"<span style='color:#666;'>{_esc(filed)} · {_esc(doc_type)}</span><br>"
+            f"<span style='color:#666;'>{_esc(filed)}</span><br>"
             f"<span>{_esc(description)}</span>"
-            + (
-                f"<br><span style='color:#666;font-size:12px;'>"
-                f"Submitter: {_esc(submitter)}</span>"
-                if submitter
-                else ""
-            )
-            + f"<br><span style='color:#666;font-size:12px;'>"
-            f"Accession: {_esc(accession)} · "
-            f"Matched keywords: {_esc(', '.join(matched))}</span>"
             f"</li>"
         )
     return "<ul style='font-size:14px;padding-left:20px;'>" + "".join(items) + "</ul>"
