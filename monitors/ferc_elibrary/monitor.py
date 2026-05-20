@@ -47,7 +47,9 @@ MONITOR_NAME = "FERC eLibrary"
 # This endpoint is undocumented; if it stops working, open the eLibrary
 # search page in a browser, open DevTools → Network tab, perform a
 # search, and copy the resulting POST request's URL and JSON body.
-SEARCH_URL = "https://elibrary.ferc.gov/eLibraryApi/v1/Search/Search"
+#
+# URL and payload schema verified from live DevTools traffic.
+SEARCH_URL = "https://elibrary.ferc.gov/eLibraryWebAPI/api/Search/AdvancedSearch"
 
 # Public eLibrary doc-info URL pattern. Used to build a "view this document"
 # link in the email. {accession} is the document's accession number.
@@ -90,72 +92,137 @@ def load_config() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def search_ferc(start_date: datetime, end_date: datetime) -> list[dict[str, Any]]:
-    """Search FERC eLibrary for all filings in [start_date, end_date].
+def search_ferc(
+    start_date: datetime,
+    end_date: datetime,
+    docket_prefixes: list[str],
+) -> list[dict[str, Any]]:
+    """Search FERC eLibrary for filings in [start_date, end_date].
 
-    We don't filter by docket or keyword here — those are applied locally
-    in `filter_documents`. This keeps the request simple and makes it
-    easy to adjust criteria without re-coding the API call.
+    Filters by docket prefix server-side (FERC's API supports this via
+    `docketSearches`), which keeps each request small. We still apply the
+    keyword filter locally afterward.
 
     Returns a list of raw document dicts as returned by the API.
     """
-    # Date format expected by the API (ISO 8601 date only).
     start = start_date.strftime("%Y-%m-%d")
     end = end_date.strftime("%Y-%m-%d")
 
-    # Page through results in chunks. Initial guess at field names —
-    # adjust if the first run reveals different ones.
-    page_size = 100
-    page_number = 1
     all_results: list[dict[str, Any]] = []
+    seen_accessions: set[str] = set()  # dedupe across multiple prefix queries
 
-    while True:
-        payload = {
-            "filedDateFrom": start,
-            "filedDateTo": end,
-            "pageNumber": page_number,
-            "pageSize": page_size,
-            "sortBy": "filed_date",
-            "sortDir": "desc",
-        }
-        print(
-            f"[{MONITOR_NAME}] requesting page {page_number} "
-            f"({start} to {end}, {page_size}/page)…"
-        )
-        resp = fetch.post_json(SEARCH_URL, json_body=payload)
-        # Try several common response shapes — log everything for debugging
-        # on first run so we can see what fields are actually returned.
-        docs = (
-            resp.get("documents")
-            or resp.get("results")
-            or resp.get("data")
-            or resp.get("items")
-            or []
-        )
-        if page_number == 1:
-            # Log the keys we see so we can adjust if the shape is unexpected
-            print(f"[{MONITOR_NAME}] response top-level keys: {list(resp.keys())}")
-            if docs:
+    # Loop over each configured docket prefix. The API's docket field accepts
+    # a partial value (no dash) which acts as a prefix match in FERC's UI.
+    for prefix in docket_prefixes:
+        print(f"[{MONITOR_NAME}] searching docket prefix '{prefix}'…")
+        page = 0
+        while True:
+            payload = _build_payload(start, end, prefix, page)
+            print(f"[{MONITOR_NAME}]   page {page}…")
+            resp = fetch.post_json(SEARCH_URL, json_body=payload)
+
+            # On the first page of the first prefix, log response shape so
+            # we can adapt if FERC changes field names.
+            if page == 0 and prefix == docket_prefixes[0]:
                 print(
-                    f"[{MONITOR_NAME}] first doc keys: {list(docs[0].keys())}"
+                    f"[{MONITOR_NAME}]   response top-level keys: "
+                    f"{list(resp.keys()) if isinstance(resp, dict) else type(resp).__name__}"
                 )
 
-        if not docs:
-            break
+            # FERC's response shape: try a few common keys for the doc list
+            docs = (
+                resp.get("documents")
+                or resp.get("results")
+                or resp.get("data")
+                or resp.get("items")
+                or resp.get("searchResults")
+                or (resp if isinstance(resp, list) else [])
+            )
 
-        all_results.extend(docs)
-        print(f"[{MONITOR_NAME}]   got {len(docs)} docs (running total: {len(all_results)})")
+            if not docs:
+                break
 
-        # Stop if we got fewer than a full page (we're done)
-        if len(docs) < page_size:
-            break
-        # Safety cap so a bad response doesn't infinitely loop
-        if page_number >= 50:
-            print(f"[{MONITOR_NAME}] hit pagination safety cap at page 50; stopping")
-            break
-        page_number += 1
+            if page == 0 and prefix == docket_prefixes[0] and docs:
+                print(
+                    f"[{MONITOR_NAME}]   first doc keys: {list(docs[0].keys())}"
+                )
+
+            # Dedupe (same doc could match multiple prefixes in theory)
+            page_new = 0
+            for doc in docs:
+                accession = (
+                    doc.get("accessionNumber")
+                    or doc.get("accession_number")
+                    or doc.get("AccessionNumber")
+                )
+                key = str(accession) if accession else json.dumps(doc, sort_keys=True)
+                if key in seen_accessions:
+                    continue
+                seen_accessions.add(key)
+                all_results.append(doc)
+                page_new += 1
+            print(
+                f"[{MONITOR_NAME}]   got {len(docs)} docs "
+                f"({page_new} new, running total: {len(all_results)})"
+            )
+
+            # Stop paginating this prefix if we got fewer than a full page
+            if len(docs) < 100:
+                break
+            # Safety cap so a broken response doesn't infinite-loop
+            if page >= 50:
+                print(f"[{MONITOR_NAME}]   pagination safety cap at page 50; stopping")
+                break
+            page += 1
 
     return all_results
+
+
+def _build_payload(
+    start: str, end: str, docket_prefix: str, page: int
+) -> dict[str, Any]:
+    """Build the search request payload.
+
+    Schema verified from live DevTools traffic on elibrary.ferc.gov.
+    Notes:
+    - `searchText: "*"` is the wildcard that means "match anything"
+    - `curPage` is 0-indexed
+    - `dateSearches[*].dateType = "filed_date"` filters by filed date
+    - `docketSearches[*].docketNumber` is a prefix match (e.g. "ER" matches all ER dockets)
+    - `searchDescription: true` indexes against the doc description
+    - `searchFullText: false` skips full-text search (we filter by keyword locally)
+    """
+    return {
+        "searchText": "*",
+        "searchFullText": False,
+        "searchDescription": True,
+        "accessionNumber": None,
+        "affiliations": [],
+        "allDates": False,
+        "availability": None,
+        "categories": [],
+        "classTypes": [],
+        "curPage": page,
+        "dateSearches": [
+            {
+                "dateType": "filed_date",
+                "startDate": start,
+                "endDate": end,
+            }
+        ],
+        "docketSearches": [
+            {
+                "docketNumber": docket_prefix,
+                "subDocketNumbers": [],
+            }
+        ],
+        "eFiling": False,
+        "groupBy": "NONE",
+        "idolResultID": "",
+        "libraries": [],
+        "resultsPerPage": 100,
+        "sortBy": "",
+    }
 
 
 def normalize_document(raw: dict[str, Any]) -> dict[str, Any]:
@@ -430,7 +497,7 @@ def main() -> int:
         start_date = end_date - timedelta(days=lookback_days)
 
         print(f"[{MONITOR_NAME}] searching FERC…")
-        raw_docs = search_ferc(start_date, end_date)
+        raw_docs = search_ferc(start_date, end_date, config["docket_prefixes"])
         print(f"[{MONITOR_NAME}] retrieved {len(raw_docs)} raw documents")
 
         # Save raw response for debugging (gitignored _workdir)
