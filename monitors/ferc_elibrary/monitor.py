@@ -1,15 +1,12 @@
-"""FERC eLibrary new-documents monitor.
+"""FERC eLibrary documents monitor.
 
 Once a week, queries FERC's eLibrary search for documents filed in the
 last N days, filters by configured criteria (docket prefix AND keywords
-in description), and emails a list of NEW matches we haven't reported
-on before.
+in description), and emails the full list of matches.
 
-Differs from MISO/SPP monitors:
-- Source is a search API, not a static file
-- "What's new" is defined as accession numbers we haven't seen,
-  not as field-level changes in a row
-- Snapshot is just a record of accession numbers already reported
+Unlike the MISO/SPP monitors, this one has no concept of "what's new" —
+it always shows everything in the lookback window. No snapshot file,
+no diffing, no state to persist.
 
 The FERC eLibrary search endpoint and its request/response shape are
 not officially documented. The constants below reflect the current
@@ -60,12 +57,7 @@ LANDING_URL = "https://elibrary.ferc.gov/eLibrary/search"
 HERE = Path(__file__).resolve().parent
 CONFIG_FILE = HERE / "config.yml"
 SNAPSHOT_DIR = HERE / "snapshots"
-SEEN_FILE = SNAPSHOT_DIR / "seen.json"
 WORKDIR = HERE / "_workdir"
-
-# Cap on how many seen accession numbers we keep. The seen-set prevents
-# re-reporting the same doc; we don't need infinite history.
-SEEN_RETENTION_LIMIT = 50_000
 
 
 # ---------------------------------------------------------------------------
@@ -381,59 +373,26 @@ def filter_documents(
 
 
 # ---------------------------------------------------------------------------
-# Seen-set I/O
-# ---------------------------------------------------------------------------
-
-
-def load_seen() -> set[str]:
-    if not SEEN_FILE.exists():
-        return set()
-    try:
-        with SEEN_FILE.open("r") as f:
-            data = json.load(f)
-        return set(data.get("accession_numbers", []))
-    except Exception:  # noqa: BLE001
-        return set()
-
-
-def save_seen(accession_numbers: set[str]) -> None:
-    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
-    # Cap the seen-set size to avoid unbounded growth. Keep newest by
-    # sorting accession numbers descending (FERC accession numbers start
-    # with YYYYMMDD so lexical sort = chronological sort).
-    trimmed = sorted(accession_numbers, reverse=True)[:SEEN_RETENTION_LIMIT]
-    payload = {
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-        "count": len(trimmed),
-        "accession_numbers": trimmed,
-    }
-    with SEEN_FILE.open("w") as f:
-        json.dump(payload, f, indent=2)
-
-
-# ---------------------------------------------------------------------------
 # Email formatting
 # ---------------------------------------------------------------------------
 
 
 def format_email(
-    new_matches: list[dict[str, Any]],
+    matched: list[dict[str, Any]],
     total_filings_searched: int,
-    total_matches_this_period: int,
     lookback_days: int,
     config: dict[str, Any],
 ) -> tuple[str, str]:
     """Return (subject, html_body)."""
-    count = len(new_matches)
+    count = len(matched)
     if count == 0:
-        subject = f"FERC eLibrary — no new matches this week"
+        subject = f"FERC eLibrary — no matches this week"
     else:
-        subject = f"FERC eLibrary — {count} new match{'es' if count != 1 else ''}"
+        subject = f"FERC eLibrary — {count} match{'es' if count != 1 else ''}"
 
     html = _render_html(
-        new_matches,
+        matched,
         total_filings_searched,
-        total_matches_this_period,
         lookback_days,
         config,
     )
@@ -441,9 +400,8 @@ def format_email(
 
 
 def _render_html(
-    new_matches: list[dict[str, Any]],
+    matched: list[dict[str, Any]],
     total_filings_searched: int,
-    total_matches_this_period: int,
     lookback_days: int,
     config: dict[str, Any],
 ) -> str:
@@ -458,20 +416,20 @@ def _render_html(
         f"Run at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} · "
         f"searched last {lookback_days} days · "
         f"{total_filings_searched} total filings · "
-        f"{total_matches_this_period} matched criteria · "
-        f"<strong>{len(new_matches)} new since last week</strong>"
+        f"<strong>{len(matched)} matched criteria</strong>"
         f"</p>"
     )
 
     # ---- The list ----
-    if not new_matches:
+    if not matched:
         parts.append(
-            "<p>No new documents matched your criteria this week. "
+            "<p>No documents matched your criteria in the last "
+            f"{lookback_days} days. "
             "This email confirms the monitor is running correctly.</p>"
         )
     else:
-        parts.append("<h3>New matching documents</h3>")
-        parts.append(_doc_list(new_matches))
+        parts.append("<h3>Matching documents</h3>")
+        parts.append(_doc_list(matched))
 
     # ---- Criteria reminder ----
     parts.append("<h3 style='margin-top:24px;'>Current criteria</h3>")
@@ -570,31 +528,14 @@ def main() -> int:
         matched = filter_documents(documents, config)
         print(f"[{MONITOR_NAME}] {len(matched)} matched criteria")
 
-        seen = load_seen()
-        new_matches = [
-            d
-            for d in matched
-            if d.get("accession_number") and d["accession_number"] not in seen
-        ]
-        print(f"[{MONITOR_NAME}] {len(new_matches)} are new since last run")
-
         subject, html = format_email(
-            new_matches,
+            matched,
             total_filings_searched=len(documents),
-            total_matches_this_period=len(matched),
             lookback_days=lookback_days,
             config=config,
         )
         print(f"[{MONITOR_NAME}] sending email: {subject}")
         notify.send_email(to=recipient, subject=subject, html=html)
-
-        # Update seen-set with everything we matched (not just new),
-        # so partial overlaps in lookback periods don't re-trigger.
-        seen.update(
-            d["accession_number"] for d in matched if d.get("accession_number")
-        )
-        save_seen(seen)
-        print(f"[{MONITOR_NAME}] seen-set now has {len(seen)} accession numbers")
         return 0
 
     except Exception:  # noqa: BLE001
