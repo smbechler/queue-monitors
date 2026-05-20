@@ -229,36 +229,70 @@ def _build_payload(start: str, end: str, page: int) -> dict[str, Any]:
 def normalize_document(raw: dict[str, Any]) -> dict[str, Any]:
     """Normalize the FERC API response into a stable shape we use elsewhere.
 
-    The API's field names may vary — this function maps common alternates
-    to canonical keys. If a field name turns out to be different than
-    expected, update the candidate lists here.
+    The FERC AdvancedSearch endpoint uses some unusual field names:
+    - `acesssionNumber` (sic — three s's; that's FERC's typo, not ours)
+    - `docketNumbers` is a list of strings, not a single string
+    - `classTypes` is a list of strings, not a single string
+    - `affiliations` is a list of strings (submitting parties)
     """
     return {
+        # FERC's actual field is misspelled with three s's. We check both
+        # to be defensive in case they ever fix it.
         "accession_number": _first(
-            raw, "accessionNumber", "accession_number", "accession", "AccessionNumber"
+            raw,
+            "acesssionNumber",  # FERC's actual (misspelled) field
+            "accessionNumber",
+            "accession_number",
+            "accession",
+            "AccessionNumber",
         ),
-        "docket_number": _first(
-            raw, "docketNumber", "docket_number", "docket", "DocketNumber"
+        # Note: docketNumbers is plural and a list. We keep the full list
+        # AND a primary docket for display purposes.
+        "docket_numbers": _as_list(
+            _first(raw, "docketNumbers", "docket_numbers", "dockets", "DocketNumbers")
+        ),
+        "docket_number": _first_in_list(
+            raw, ("docketNumbers", "docket_numbers", "dockets", "DocketNumbers")
         ),
         "filed_date": _first(
             raw, "filedDate", "filed_date", "filed", "FiledDate"
         ),
         "description": _first(
-            raw, "description", "Description", "shortDescription", "title", "Title"
-        ),
-        "document_type": _first(
             raw,
-            "documentType",
-            "document_type",
-            "classType",
-            "class_type",
-            "ClassType",
-            "type",
+            "description",
+            "Description",
+            "summary",
+            "shortDescription",
+            "title",
+            "Title",
         ),
-        "library": _first(raw, "library", "Library"),
+        # classTypes is a list — join into a readable string for display
+        "document_type": _join_list(
+            _first(
+                raw,
+                "classTypes",
+                "documentType",
+                "document_type",
+                "classType",
+                "class_type",
+                "ClassType",
+                "type",
+            )
+        ),
+        "library": _join_list(
+            _first(raw, "libraries", "library", "Library")
+        ),
         "category": _first(raw, "category", "Category"),
-        "submitter": _first(
-            raw, "submitter", "Submitter", "submittedBy", "filedBy", "FiledBy"
+        "submitter": _join_list(
+            _first(
+                raw,
+                "affiliations",
+                "submitter",
+                "Submitter",
+                "submittedBy",
+                "filedBy",
+                "FiledBy",
+            )
         ),
         # Keep the raw blob too, for forensic debugging if something looks off
         "_raw": raw,
@@ -271,6 +305,31 @@ def _first(d: dict[str, Any], *keys: str) -> Any:
         if k in d and d[k] is not None and d[k] != "":
             return d[k]
     return None
+
+
+def _first_in_list(d: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    """Return the first item of the first matching list field."""
+    for k in keys:
+        value = d.get(k)
+        if isinstance(value, list) and value:
+            return value[0]
+    return None
+
+
+def _as_list(value: Any) -> list:
+    """Coerce to a list. None → [], scalars → [scalar], lists → unchanged."""
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+
+def _join_list(value: Any) -> str | None:
+    """If value is a list, join with ', '. Otherwise return as-is."""
+    if isinstance(value, list):
+        return ", ".join(str(v) for v in value if v) or None
+    return value
 
 
 # ---------------------------------------------------------------------------
@@ -294,11 +353,18 @@ def filter_documents(
 
     matches = []
     for doc in documents:
-        docket = (doc.get("docket_number") or "").upper().strip()
+        # A doc may be filed under multiple dockets; check all of them.
+        dockets = [
+            (d or "").upper().strip() for d in (doc.get("docket_numbers") or [])
+        ]
         description = doc.get("description") or ""
 
-        # Filter 1: docket prefix
-        if not any(docket.startswith(prefix) for prefix in docket_prefixes):
+        # Filter 1: at least one docket starts with one of our prefixes
+        docket_match = any(
+            any(docket.startswith(prefix) for prefix in docket_prefixes)
+            for docket in dockets
+        )
+        if not docket_match:
             continue
 
         # Filter 2: at least one keyword matches the description
@@ -433,7 +499,12 @@ def _doc_list(docs: list[dict[str, Any]]) -> str:
     items = []
     for doc in docs:
         accession = doc.get("accession_number") or "?"
-        docket = doc.get("docket_number") or "?"
+        # Display all dockets if multiple, else just the primary
+        dockets = doc.get("docket_numbers") or []
+        if dockets:
+            docket_display = ", ".join(dockets)
+        else:
+            docket_display = doc.get("docket_number") or "?"
         filed = doc.get("filed_date") or "?"
         # Trim time portion if present (e.g. "2026-05-12T00:00:00" → "2026-05-12")
         if isinstance(filed, str) and "T" in filed:
@@ -446,7 +517,7 @@ def _doc_list(docs: list[dict[str, Any]]) -> str:
 
         items.append(
             f"<li style='margin-bottom:14px;'>"
-            f"<a href='{link}' style='font-weight:600;'>{_esc(docket)}</a> · "
+            f"<a href='{link}' style='font-weight:600;'>{_esc(docket_display)}</a> · "
             f"<span style='color:#666;'>{_esc(filed)} · {_esc(doc_type)}</span><br>"
             f"<span>{_esc(description)}</span>"
             + (
