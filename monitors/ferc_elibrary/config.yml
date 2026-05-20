@@ -1,0 +1,27 @@
+# FERC eLibrary Monitor — Search Criteria
+#
+# Edit this file to change what counts as a "relevant" FERC document.
+# Commit and push to take effect on the next scheduled run.
+#
+# Matching logic: a document is INCLUDED if BOTH conditions are true:
+#   1. Docket starts with one of `docket_prefixes` (e.g. "ER")
+#   2. Description/title contains at least one of `keywords` (case-insensitive)
+#
+# Keywords match in the document's description/title only, not full text.
+# Acronyms with word boundaries (e.g. "PJM") match "PJM" but not "PJMASTER".
+
+docket_prefixes:
+  - "ER"
+
+keywords:
+  - "Midcontinent Independent System Operator"
+  - "Southwest Power Pool"
+  - "Pennsylvania New Jersey Maryland"
+  - "PJM"
+  - "MISO"
+  - "SPP"
+
+# How far back to look on each run, in days.
+# A weekly Friday run with lookback_days: 7 covers the prior week.
+# Set to 8-9 if you want a small overlap to catch documents posted late.
+lookback_days: 8
