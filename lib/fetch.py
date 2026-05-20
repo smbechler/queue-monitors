@@ -37,6 +37,29 @@ def download(url: str, dest: Path, timeout: int = DEFAULT_TIMEOUT) -> Path:
     return dest
 
 
+def post_json(
+    url: str,
+    json_body: dict,
+    timeout: int = DEFAULT_TIMEOUT,
+    extra_headers: dict | None = None,
+) -> dict:
+    """POST a JSON body, return parsed JSON response.
+
+    Adds standard browser-like headers; raises on HTTP errors.
+    `extra_headers` is merged in last so callers can override.
+    """
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+    if extra_headers:
+        headers.update(extra_headers)
+    resp = requests.post(url, json=json_body, headers=headers, timeout=timeout)
+    resp.raise_for_status()
+    return resp.json()
+
+
 def find_link(html: str, pattern: str) -> str | None:
     """Find the first href in HTML matching a regex pattern.
 
