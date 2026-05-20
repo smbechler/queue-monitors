@@ -14,9 +14,6 @@ on:
     - cron: "0 17 * * 5"   # 1:00 PM EDT every Friday (change to 18 in winter)
   workflow_dispatch:  # allow manual runs
 
-permissions:
-  contents: write
-
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -46,19 +43,3 @@ jobs:
           MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
           MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
         run: python monitors/ferc_elibrary/monitor.py
-
-      - name: Commit updated seen-set
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -f "monitors/ferc_elibrary/snapshots/seen.json" ]; then
-            git add monitors/ferc_elibrary/snapshots/seen.json
-          else
-            echo "No seen.json file to commit (script may have failed)."
-          fi
-          if git diff --cached --quiet; then
-            echo "No seen-set changes to commit."
-          else
-            git commit -m "ferc_elibrary: seen-set update"
-            git push
-          fi
