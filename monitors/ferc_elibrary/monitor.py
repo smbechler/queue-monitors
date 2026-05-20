@@ -95,13 +95,17 @@ def load_config() -> dict[str, Any]:
 def search_ferc(
     start_date: datetime,
     end_date: datetime,
-    docket_prefixes: list[str],
+    docket_prefixes: list[str],  # kept for API compatibility; filtered locally
 ) -> list[dict[str, Any]]:
-    """Search FERC eLibrary for filings in [start_date, end_date].
+    """Search FERC eLibrary for all filings in [start_date, end_date].
 
-    Filters by docket prefix server-side (FERC's API supports this via
-    `docketSearches`), which keeps each request small. We still apply the
-    keyword filter locally afterward.
+    We tried filtering by docket prefix server-side via `docketSearches`,
+    but FERC's API treats that field as an exact match, not a prefix —
+    sending "ER" returns zero results. So we fetch ALL filings in the
+    date range and apply both docket-prefix and keyword filters locally
+    in `filter_documents`. The `docket_prefixes` parameter is kept in
+    this function's signature so future refactors can re-introduce
+    server-side filtering if FERC adds support for it.
 
     Returns a list of raw document dicts as returned by the API.
     """
@@ -109,106 +113,75 @@ def search_ferc(
     end = end_date.strftime("%Y-%m-%d")
 
     all_results: list[dict[str, Any]] = []
-    seen_accessions: set[str] = set()  # dedupe across multiple prefix queries
+    page = 0
+    while True:
+        payload = _build_payload(start, end, page)
+        print(f"[{MONITOR_NAME}] page {page}…")
+        resp = fetch.post_json(SEARCH_URL, json_body=payload)
 
-    # Loop over each configured docket prefix. The API's docket field accepts
-    # a partial value (no dash) which acts as a prefix match in FERC's UI.
-    for prefix in docket_prefixes:
-        print(f"[{MONITOR_NAME}] searching docket prefix '{prefix}'…")
-        page = 0
-        while True:
-            payload = _build_payload(start, end, prefix, page)
-            print(f"[{MONITOR_NAME}]   page {page}…")
-            resp = fetch.post_json(SEARCH_URL, json_body=payload)
-
-            # On the first page of the first prefix, log response shape so
-            # we can adapt if FERC changes field names.
-            if page == 0 and prefix == docket_prefixes[0]:
-                print(
-                    f"[{MONITOR_NAME}]   response top-level keys: "
-                    f"{list(resp.keys()) if isinstance(resp, dict) else type(resp).__name__}"
-                )
-                # Log result counts if present so we know how many FERC found
-                for count_key in ("totalHits", "numHits", "totalCount", "count"):
-                    if count_key in resp:
-                        print(
-                            f"[{MONITOR_NAME}]   {count_key}: {resp[count_key]}"
-                        )
-                # Log if FERC reports an error
-                if resp.get("errorMessage"):
-                    print(
-                        f"[{MONITOR_NAME}]   errorMessage: {resp['errorMessage']}"
-                    )
-                if resp.get("success") is False:
-                    print(f"[{MONITOR_NAME}]   success=False — request rejected")
-                # Save the raw response so we can inspect the full structure
-                # if results aren't being extracted correctly
-                try:
-                    (WORKDIR / "first_response.json").write_text(
-                        json.dumps(resp, indent=2, default=str)[:50000],
-                        encoding="utf-8",
-                    )
-                    print(
-                        f"[{MONITOR_NAME}]   raw response saved to "
-                        f"_workdir/first_response.json"
-                    )
-                except Exception as e:  # noqa: BLE001
-                    print(f"[{MONITOR_NAME}]   (couldn't save raw response: {e})")
-
-            # FERC's response shape: try common keys for the doc list.
-            # `searchHits` is the key FERC's AdvancedSearch endpoint uses.
-            docs = (
-                resp.get("searchHits")
-                or resp.get("documents")
-                or resp.get("results")
-                or resp.get("data")
-                or resp.get("items")
-                or resp.get("searchResults")
-                or (resp if isinstance(resp, list) else [])
-            )
-
-            if not docs:
-                break
-
-            if page == 0 and prefix == docket_prefixes[0] and docs:
-                print(
-                    f"[{MONITOR_NAME}]   first doc keys: {list(docs[0].keys())}"
-                )
-
-            # Dedupe (same doc could match multiple prefixes in theory)
-            page_new = 0
-            for doc in docs:
-                accession = (
-                    doc.get("accessionNumber")
-                    or doc.get("accession_number")
-                    or doc.get("AccessionNumber")
-                )
-                key = str(accession) if accession else json.dumps(doc, sort_keys=True)
-                if key in seen_accessions:
-                    continue
-                seen_accessions.add(key)
-                all_results.append(doc)
-                page_new += 1
+        # First-page diagnostics
+        if page == 0:
             print(
-                f"[{MONITOR_NAME}]   got {len(docs)} docs "
-                f"({page_new} new, running total: {len(all_results)})"
+                f"[{MONITOR_NAME}]   response top-level keys: "
+                f"{list(resp.keys()) if isinstance(resp, dict) else type(resp).__name__}"
+            )
+            for count_key in ("totalHits", "numHits", "totalCount", "count"):
+                if count_key in resp:
+                    print(f"[{MONITOR_NAME}]   {count_key}: {resp[count_key]}")
+            if resp.get("errorMessage"):
+                print(f"[{MONITOR_NAME}]   errorMessage: {resp['errorMessage']}")
+            if resp.get("success") is False:
+                print(f"[{MONITOR_NAME}]   success=False — request rejected")
+            # Save the raw response so we can inspect the full structure
+            try:
+                (WORKDIR / "first_response.json").write_text(
+                    json.dumps(resp, indent=2, default=str)[:50000],
+                    encoding="utf-8",
+                )
+                print(
+                    f"[{MONITOR_NAME}]   raw response saved to "
+                    f"_workdir/first_response.json"
+                )
+            except Exception as e:  # noqa: BLE001
+                print(f"[{MONITOR_NAME}]   (couldn't save raw response: {e})")
+
+        docs = (
+            resp.get("searchHits")
+            or resp.get("documents")
+            or resp.get("results")
+            or resp.get("data")
+            or resp.get("items")
+            or resp.get("searchResults")
+            or (resp if isinstance(resp, list) else [])
+        )
+
+        if page == 0 and docs:
+            print(
+                f"[{MONITOR_NAME}]   first doc keys: {list(docs[0].keys())}"
             )
 
-            # Stop paginating this prefix if we got fewer than a full page
-            if len(docs) < 100:
-                break
-            # Safety cap so a broken response doesn't infinite-loop
-            if page >= 50:
-                print(f"[{MONITOR_NAME}]   pagination safety cap at page 50; stopping")
-                break
-            page += 1
+        if not docs:
+            break
+
+        all_results.extend(docs)
+        print(
+            f"[{MONITOR_NAME}]   got {len(docs)} docs "
+            f"(running total: {len(all_results)})"
+        )
+
+        # Stop paginating if we got fewer than a full page
+        if len(docs) < 100:
+            break
+        # Safety cap so a broken response doesn't infinite-loop
+        if page >= 50:
+            print(f"[{MONITOR_NAME}]   pagination safety cap at page 50; stopping")
+            break
+        page += 1
 
     return all_results
 
 
-def _build_payload(
-    start: str, end: str, docket_prefix: str, page: int
-) -> dict[str, Any]:
+def _build_payload(start: str, end: str, page: int) -> dict[str, Any]:
     """Build the search request payload.
 
     Schema verified from live DevTools traffic on elibrary.ferc.gov.
@@ -216,7 +189,7 @@ def _build_payload(
     - `searchText: "*"` is the wildcard that means "match anything"
     - `curPage` is 0-indexed
     - `dateSearches[*].dateType = "filed_date"` filters by filed date
-    - `docketSearches[*].docketNumber` is a prefix match (e.g. "ER" matches all ER dockets)
+    - `docketSearches` is intentionally empty — see search_ferc() docstring
     - `searchDescription: true` indexes against the doc description
     - `searchFullText: false` skips full-text search (we filter by keyword locally)
     """
@@ -240,7 +213,7 @@ def _build_payload(
         ],
         "docketSearches": [
             {
-                "docketNumber": docket_prefix,
+                "docketNumber": "",
                 "subDocketNumbers": [],
             }
         ],
