@@ -128,10 +128,38 @@ def search_ferc(
                     f"[{MONITOR_NAME}]   response top-level keys: "
                     f"{list(resp.keys()) if isinstance(resp, dict) else type(resp).__name__}"
                 )
+                # Log result counts if present so we know how many FERC found
+                for count_key in ("totalHits", "numHits", "totalCount", "count"):
+                    if count_key in resp:
+                        print(
+                            f"[{MONITOR_NAME}]   {count_key}: {resp[count_key]}"
+                        )
+                # Log if FERC reports an error
+                if resp.get("errorMessage"):
+                    print(
+                        f"[{MONITOR_NAME}]   errorMessage: {resp['errorMessage']}"
+                    )
+                if resp.get("success") is False:
+                    print(f"[{MONITOR_NAME}]   success=False — request rejected")
+                # Save the raw response so we can inspect the full structure
+                # if results aren't being extracted correctly
+                try:
+                    (WORKDIR / "first_response.json").write_text(
+                        json.dumps(resp, indent=2, default=str)[:50000],
+                        encoding="utf-8",
+                    )
+                    print(
+                        f"[{MONITOR_NAME}]   raw response saved to "
+                        f"_workdir/first_response.json"
+                    )
+                except Exception as e:  # noqa: BLE001
+                    print(f"[{MONITOR_NAME}]   (couldn't save raw response: {e})")
 
-            # FERC's response shape: try a few common keys for the doc list
+            # FERC's response shape: try common keys for the doc list.
+            # `searchHits` is the key FERC's AdvancedSearch endpoint uses.
             docs = (
-                resp.get("documents")
+                resp.get("searchHits")
+                or resp.get("documents")
                 or resp.get("results")
                 or resp.get("data")
                 or resp.get("items")
