@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-05-22T15:45:04.796021+00:00",
+  "captured_at": "2026-05-23T14:25:59.676595+00:00",
   "source_last_updated": "5/22/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
@@ -4212,8 +4212,8 @@
       "State": "OK",
       "TO at POI": "OG&E",
       "In-Service Date": null,
-      "Commercial Operation Date": "5/1/2027",
-      "Cessation Date": "12/31/2026",
+      "Commercial Operation Date": "12/15/2026",
+      "Cessation Date": "12/15/2026",
       "Original Generator Commercial Op Date": "3/11/2016",
       "Capacity": "300",
       "MAX Summer MW": "300",
@@ -4227,7 +4227,7 @@
       "Substation or Line": "OG&E Renfrow 345kV Substation",
       "Request Received": "12/17/2024",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
