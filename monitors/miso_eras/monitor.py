@@ -131,24 +131,50 @@ def _clean_value(value: Any) -> Any:
 # ---------------------------------------------------------------------------
 
 
-def summarize(projects: list[dict[str, Any]]) -> dict[str, int]:
-    """Compute the headline counts."""
-    total = len(projects)
-    withdrawn = sum(
-        1 for p in projects if _is_withdrawn(p)
+def summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
+    """Compute counts broken out by carve-out category and request status.
+
+    Returns a structure like:
+        {
+          "statuses": ["Active", "Done", "Under review", "Withdrawn"],
+          "regular": {"total": N, "by_status": {"Active": n, ...}},
+          "ipp":     {"total": N, "by_status": {"Active": n, ...}},
+        }
+
+    Status columns are discovered dynamically from the data, so a new
+    MISO status value shows up automatically without a code change.
+    Carve Out values other than "IPP" (including blank/N/A) count as Regular.
+    """
+    # Discover the set of statuses present, in a stable sorted order.
+    statuses = sorted(
+        {_status_of(p) for p in projects if _status_of(p)}
     )
-    ipp_carveouts = sum(
-        1 for p in projects if _is_ipp(p)
-    )
-    ipp_withdrawn = sum(
-        1 for p in projects if _is_ipp(p) and _is_withdrawn(p)
-    )
+
+    regular_by_status: dict[str, int] = {s: 0 for s in statuses}
+    ipp_by_status: dict[str, int] = {s: 0 for s in statuses}
+    regular_total = 0
+    ipp_total = 0
+
+    for p in projects:
+        status = _status_of(p)
+        if _is_ipp(p):
+            ipp_total += 1
+            if status in ipp_by_status:
+                ipp_by_status[status] += 1
+        else:
+            regular_total += 1
+            if status in regular_by_status:
+                regular_by_status[status] += 1
+
     return {
-        "total": total,
-        "withdrawn": withdrawn,
-        "ipp_carveouts": ipp_carveouts,
-        "ipp_withdrawn": ipp_withdrawn,
+        "statuses": statuses,
+        "regular": {"total": regular_total, "by_status": regular_by_status},
+        "ipp": {"total": ipp_total, "by_status": ipp_by_status},
     }
+
+
+def _status_of(project: dict[str, Any]) -> str:
+    return (project.get("Request Status") or "").strip()
 
 
 def _is_withdrawn(project: dict[str, Any]) -> bool:
@@ -216,20 +242,20 @@ def save_state(state: dict[str, Any]) -> None:
 
 
 def format_email(
-    counts: dict[str, int],
-    prev_counts: dict[str, int] | None,
+    counts: dict[str, Any],
     diff: diff_lib.Diff | None,
+    current: list[dict[str, Any]],
+    previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
     checks_since_last_email: int,
     is_change_alert: bool,
 ) -> tuple[str, str]:
     """Return (subject, html_body)."""
-    delta = _format_deltas(counts, prev_counts) if prev_counts else None
-
     # Subject line packs the most important info
+    total = counts["regular"]["total"] + counts["ipp"]["total"]
     if diff is None:
-        subject = f"MISO ERAS — initial snapshot ({counts['total']} projects)"
+        subject = f"MISO ERAS — initial snapshot ({total} projects)"
     elif diff.has_changes:
         bits = []
         if diff.added:
@@ -239,35 +265,22 @@ def format_email(
         if diff.changed:
             bits.append(f"~{len(diff.changed)}")
         prefix = "MISO ERAS [CHANGE]" if is_change_alert else "MISO ERAS"
-        subject = f"{prefix} — {' '.join(bits)} | total {counts['total']}"
+        subject = f"{prefix} — {' '.join(bits)} | total {total}"
     else:
-        subject = f"MISO ERAS — no changes | total {counts['total']}"
+        subject = f"MISO ERAS — no changes | total {total}"
 
     html = _render_html(
-        counts, delta, diff, xlsx_url, last_check, checks_since_last_email
+        counts, diff, current, previous, xlsx_url, last_check,
+        checks_since_last_email,
     )
     return subject, html
 
 
-def _format_deltas(
-    current: dict[str, int], previous: dict[str, int]
-) -> dict[str, str]:
-    out = {}
-    for key in current:
-        diff = current[key] - previous.get(key, 0)
-        if diff > 0:
-            out[key] = f"+{diff}"
-        elif diff < 0:
-            out[key] = f"{diff}"
-        else:
-            out[key] = "—"
-    return out
-
-
 def _render_html(
-    counts: dict[str, int],
-    delta: dict[str, str] | None,
+    counts: dict[str, Any],
     diff: diff_lib.Diff | None,
+    current: list[dict[str, Any]],
+    previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
     checks_since_last_email: int,
@@ -295,8 +308,12 @@ def _render_html(
         + "</p>"
     )
 
-    # ---- Changes summary (top of email) ----
-    parts.append("<h3>What changed</h3>")
+    # ---- Counts summary (top of email) ----
+    parts.append("<h3>Summary</h3>")
+    parts.append(_counts_table(counts))
+
+    # ---- Changes ----
+    parts.append("<h3 style='margin-top:24px;'>What changed</h3>")
     if diff is None:
         parts.append(
             "<p><em>This is the first snapshot — no previous data to compare against.</em></p>"
@@ -304,19 +321,21 @@ def _render_html(
     elif not diff.has_changes:
         parts.append("<p>No changes since last check.</p>")
     else:
+        current_by_id = {p["id"]: p for p in current if p.get("id")}
+        previous_by_id = (
+            {p["id"]: p for p in previous if p.get("id")} if previous else {}
+        )
         if diff.added:
             parts.append(f"<h4>Added ({len(diff.added)})</h4>")
-            parts.append(_project_list(diff.added))
+            parts.append(_project_table(diff.added))
         if diff.removed:
             parts.append(f"<h4>Removed ({len(diff.removed)})</h4>")
-            parts.append(_project_list(diff.removed))
+            parts.append(_project_table(diff.removed))
         if diff.changed:
-            parts.append(f"<h4>Status / field changes ({len(diff.changed)})</h4>")
-            parts.append(_changes_list(diff.changed))
-
-    # ---- Counts table ----
-    parts.append("<h3>Counts</h3>")
-    parts.append(_counts_table(counts, delta))
+            parts.append(f"<h4>Field changes ({len(diff.changed)})</h4>")
+            parts.append(
+                _changed_project_table(diff.changed, current_by_id, previous_by_id)
+            )
 
     # ---- Source link ----
     parts.append(
@@ -329,97 +348,178 @@ def _render_html(
     return "".join(parts)
 
 
-def _counts_table(counts: dict[str, int], delta: dict[str, str] | None) -> str:
-    rows = [
-        ("Total Projects", counts["total"], delta["total"] if delta else None),
-        ("Total Withdrawn", counts["withdrawn"], delta["withdrawn"] if delta else None),
-        # Visual separator between the two pairs
-        None,
-        ("Total IPP Carveouts", counts["ipp_carveouts"], delta["ipp_carveouts"] if delta else None),
-        (
-            "Total IPP Carveouts Withdrawn",
-            counts["ipp_withdrawn"],
-            delta["ipp_withdrawn"] if delta else None,
-        ),
+def _counts_table(counts: dict[str, Any]) -> str:
+    """Two-row summary: Regular vs IPP, broken out by request status.
+
+    Columns: category label, Total, Total − Withdrawn, then one column
+    per status discovered in the data.
+    """
+    statuses = counts["statuses"]
+
+    # Header row
+    header_cells = [
+        "<th style='text-align:left;padding:6px 12px;border-bottom:2px solid #ccc;'></th>",
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total</th>",
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total − Withdrawn</th>",
     ]
+    for status in statuses:
+        header_cells.append(
+            f"<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>"
+            f"{_esc(status)}</th>"
+        )
+
+    def _row(label: str, data: dict[str, Any]) -> str:
+        total = data["total"]
+        by_status = data["by_status"]
+        # "Total − Withdrawn": everything in this category not in a
+        # Withdrawn status. We compute it from the per-status counts.
+        withdrawn = sum(
+            n for s, n in by_status.items() if s.lower() == "withdrawn"
+        )
+        not_withdrawn = total - withdrawn
+        cells = [
+            f"<td style='padding:6px 12px;font-weight:600;'>{_esc(label)}</td>",
+            f"<td style='padding:6px 12px;text-align:right;'>{total}</td>",
+            f"<td style='padding:6px 12px;text-align:right;'>{not_withdrawn}</td>",
+        ]
+        for status in statuses:
+            cells.append(
+                f"<td style='padding:6px 12px;text-align:right;'>"
+                f"{by_status.get(status, 0)}</td>"
+            )
+        return "<tr>" + "".join(cells) + "</tr>"
+
     html = (
         "<table style='border-collapse:collapse;font-size:14px;'>"
-        "<thead><tr>"
-        "<th style='text-align:left;padding:6px 12px;border-bottom:1px solid #ddd;'>Metric</th>"
-        "<th style='text-align:right;padding:6px 12px;border-bottom:1px solid #ddd;'>Count</th>"
+        "<thead><tr>" + "".join(header_cells) + "</tr></thead><tbody>"
+        + _row("Regular", counts["regular"])
+        + _row("IPP", counts["ipp"])
+        + "</tbody></table>"
     )
-    if delta:
-        html += (
-            "<th style='text-align:right;padding:6px 12px;border-bottom:1px solid #ddd;'>"
-            "Δ since last</th>"
-        )
-    html += "</tr></thead><tbody>"
-    for row in rows:
-        if row is None:
-            # Spacer row separating the two pairs of metrics
-            colspan = 3 if delta else 2
-            html += (
-                f"<tr><td colspan='{colspan}' style='padding:4px 12px;'></td></tr>"
-            )
-            continue
-        label, count, change = row
-        html += (
-            f"<tr><td style='padding:6px 12px;'>{label}</td>"
-            f"<td style='padding:6px 12px;text-align:right;'>{count}</td>"
-        )
-        if delta:
-            color = "#888" if change == "—" else ("#0a7d2c" if change.startswith("+") else "#b3261e")
-            html += f"<td style='padding:6px 12px;text-align:right;color:{color};'>{change}</td>"
-        html += "</tr>"
-    html += "</tbody></table>"
     return html
 
 
-def _project_list(projects: list[dict[str, Any]]) -> str:
-    items = []
-    for p in projects:
-        label = _project_label(p)
-        items.append(f"<li>{label}</li>")
-    return "<ul style='font-size:14px;'>" + "".join(items) + "</ul>"
+# ---------------------------------------------------------------------------
+# Change tables (SPP-style: full row, with changed cells highlighted)
+# ---------------------------------------------------------------------------
+
+# Columns shown in the Added/Removed/Changed tables, in display order.
+# Each entry is (candidate CSV field names, display label). We try each
+# candidate in order so a slightly different MISO header still resolves.
+TABLE_COLUMNS: list[tuple[tuple[str, ...], str]] = [
+    (("Project Number",), "Project Number"),
+    (("Application ID", "Application"), "Application"),
+    (("Interconnection Customer",), "Interconnection Customer"),
+    (("Request Status",), "Request Status"),
+    (("Submitted", "Order Submitted", "Order"), "Order Submitted"),
+    (("Transmission Owner",), "Transmission Owner"),
+    (("County",), "County"),
+    (("State",), "State"),
+    (("Study Cycle",), "Study Cycle"),
+    (("Service Type",), "Service Type"),
+    (("POI Name", "POI"), "POI Name"),
+    (("Requested NRIS MW", "Requested NRIS", "Requested NRIS (MW)"), "Requested NRIS"),
+    (("Requested ERIS MW", "Requested ERIS", "Requested ERIS (MW)"), "Requested ERIS"),
+    (("Generating Facility",), "Generating Facility"),
+    (("Location of Need",), "Location of Need"),
+    (("Carve Out Requested",), "Carve Out Requested"),
+]
+
+_TABLE_STYLES = (
+    "border-collapse:collapse;font-size:12px;font-family:-apple-system,"
+    "BlinkMacSystemFont,Segoe UI,sans-serif;white-space:nowrap;"
+)
+_TH_STYLES = (
+    "text-align:left;padding:6px 10px;background:#f4f4f4;"
+    "border-bottom:2px solid #ccc;font-weight:600;"
+)
+_TD_STYLES = "padding:6px 10px;border-bottom:1px solid #eee;vertical-align:top;"
 
 
-def _changes_list(
-    changes: list[tuple[str, dict[str, tuple[Any, Any]]]],
-) -> str:
-    items = []
-    for project_id, field_changes in changes:
-        change_bits = []
-        for field_name, (old, new) in field_changes.items():
-            change_bits.append(
-                f"<li><strong>{field_name}:</strong> "
-                f"<span style='color:#b3261e;'>{_fmt(old)}</span> → "
-                f"<span style='color:#0a7d2c;'>{_fmt(new)}</span></li>"
+def _col_value(project: dict[str, Any], candidates: tuple[str, ...]) -> Any:
+    """Return the first present value among candidate field names."""
+    for field in candidates:
+        if field in project and project[field] not in (None, ""):
+            return project[field]
+    return None
+
+
+def _table_header() -> str:
+    cells = "".join(
+        f"<th style='{_TH_STYLES}'>{_esc(label)}</th>"
+        for _, label in TABLE_COLUMNS
+    )
+    return f"<thead><tr>{cells}</tr></thead>"
+
+
+def _project_table(projects: list[dict[str, Any]]) -> str:
+    """Flat table for Added / Removed sections."""
+    parts = ["<div style='overflow-x:auto;margin-bottom:16px;'>"]
+    parts.append(f"<table style='{_TABLE_STYLES}'>")
+    parts.append(_table_header())
+    parts.append("<tbody>")
+    for project in projects:
+        parts.append("<tr>")
+        for candidates, _ in TABLE_COLUMNS:
+            parts.append(
+                f"<td style='{_TD_STYLES}'>{_fmt(_col_value(project, candidates))}</td>"
             )
-        items.append(
-            f"<li><strong>Application {project_id}</strong>"
-            f"<ul style='margin-top:4px;'>{''.join(change_bits)}</ul></li>"
-        )
-    return "<ul style='font-size:14px;'>" + "".join(items) + "</ul>"
+        parts.append("</tr>")
+    parts.append("</tbody></table></div>")
+    return "".join(parts)
 
 
-def _project_label(p: dict[str, Any]) -> str:
-    pid = p.get("id", "?")
-    customer = p.get("Interconnection Customer") or "(no customer listed)"
-    status = p.get("Request Status") or "?"
-    state = p.get("State") or ""
-    fuel = p.get("Fuel Type") or ""
-    bits = [f"<strong>App {pid}</strong>", f"{customer}", f"[{status}]"]
-    if state:
-        bits.append(state)
-    if fuel:
-        bits.append(fuel)
-    return " · ".join(bits)
+def _changed_project_table(
+    changes: list[tuple[str, dict[str, tuple[Any, Any]]]],
+    current_by_id: dict[str, dict[str, Any]],
+    previous_by_id: dict[str, dict[str, Any]],
+) -> str:
+    """Table for changed projects, with changed cells highlighted."""
+    parts = ["<div style='overflow-x:auto;margin-bottom:16px;'>"]
+    parts.append(f"<table style='{_TABLE_STYLES}'>")
+    parts.append(_table_header())
+    parts.append("<tbody>")
+
+    for project_id, field_changes in changes:
+        new_row = current_by_id.get(project_id, {})
+        parts.append("<tr>")
+        for candidates, _ in TABLE_COLUMNS:
+            # A column is "changed" if any of its candidate field names
+            # appears in the diff's field_changes for this project.
+            changed_field = next(
+                (f for f in candidates if f in field_changes), None
+            )
+            if changed_field:
+                old_val, new_val = field_changes[changed_field]
+                cell = (
+                    f"<span style='color:#b3261e;text-decoration:line-through;'>"
+                    f"{_fmt(old_val)}</span><br>"
+                    f"<span style='color:#0a7d2c;font-weight:600;'>"
+                    f"{_fmt(new_val)}</span>"
+                )
+                td_style = _TD_STYLES + "background:#fff8d4;white-space:normal;"
+            else:
+                cell = _fmt(_col_value(new_row, candidates))
+                td_style = _TD_STYLES
+            parts.append(f"<td style='{td_style}'>{cell}</td>")
+        parts.append("</tr>")
+    parts.append("</tbody></table></div>")
+    return "".join(parts)
 
 
 def _fmt(value: Any) -> str:
     if value is None or value == "":
         return "<em>(empty)</em>"
-    return str(value)
+    return _esc(str(value))
+
+
+def _esc(value: Any) -> str:
+    s = str(value) if value is not None else ""
+    return (
+        s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -460,12 +560,10 @@ def main() -> int:
         previous = load_previous()
         if previous is None:
             diff = None
-            prev_counts = None
         else:
             diff = diff_lib.diff_snapshots(
                 previous, projects, id_field="id", ignore_fields=IGNORE_FIELDS
             )
-            prev_counts = summarize(previous)
 
         # Decide whether to email:
         # - Yes, if this is a scheduled-email time (10am/3pm/6pm or manual)
@@ -489,8 +587,9 @@ def main() -> int:
         if send:
             subject, html = format_email(
                 counts,
-                prev_counts,
                 diff,
+                projects,
+                previous,
                 xlsx_url,
                 last_check,
                 checks_since_last_email=state["checks_since_last_email"],
