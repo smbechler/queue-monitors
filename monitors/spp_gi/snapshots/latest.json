@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-05-25T15:46:03.961934+00:00",
-  "source_last_updated": "5/22/2026",
+  "captured_at": "2026-05-26T16:37:05.110606+00:00",
+  "source_last_updated": "5/26/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -3612,7 +3612,7 @@
       "State": "OK",
       "TO at POI": "OG&E",
       "In-Service Date": null,
-      "Commercial Operation Date": "5/31/2028",
+      "Commercial Operation Date": "11/30/2030",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "100",
@@ -3627,7 +3627,7 @@
       "Substation or Line": "Horseshoe Lake 138kV Substation",
       "Request Received": "6/12/2025",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
