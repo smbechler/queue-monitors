@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-05-28T16:47:55.925075+00:00",
-  "source_last_updated": "5/28/2026",
+  "captured_at": "2026-05-29T16:36:47.192873+00:00",
+  "source_last_updated": "5/29/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -12927,7 +12927,7 @@
       "Substation or Line": "Evergy Tap the La Cygne to Stillwel 345 kV Line",
       "Request Received": "5/14/2021",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -12957,7 +12957,7 @@
       "Substation or Line": "Evergy Tap the La Cygne to Stillwel 345 kV Line",
       "Request Received": "5/14/2021",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
