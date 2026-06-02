@@ -1,7 +1,7 @@
 name: SPP GI Monitor
 
-# Once-daily check, 9am Eastern. Always emails — even on no-change days —
-# so you know the monitor is still alive.
+# Once-daily check, 9am Eastern, Monday-Friday only. Always emails — even
+# on no-change days — so you know the monitor is still alive.
 #
 # DST note: during EDT (UTC-4), 9am ET = 13:00 UTC. During EST (UTC-5),
 # 9am ET = 14:00 UTC. When DST flips in November, change the hour value
@@ -9,7 +9,7 @@ name: SPP GI Monitor
 
 on:
   schedule:
-    - cron: "0 13 * * *"   # 9:00 AM EDT (change to 14 in winter)
+    - cron: "0 13 * * 1-5" # 9:00 AM EDT, Mon-Fri (change to 14 in winter)
   workflow_dispatch:
 
 permissions:
@@ -58,5 +58,18 @@ jobs:
             echo "No snapshot changes to commit."
           else
             git commit -m "spp_gi: snapshot update"
-            git push
+            # Push with retry — if another workflow pushed in parallel, rebase and retry
+            for attempt in 1 2 3; do
+              if git push; then
+                echo "Push succeeded on attempt $attempt"
+                break
+              fi
+              echo "Push failed (attempt $attempt) — pulling latest and retrying"
+              git pull --rebase origin main
+              if [ "$attempt" = "3" ]; then
+                echo "Giving up after 3 attempts"
+                exit 1
+              fi
+              sleep 2
+            done
           fi
