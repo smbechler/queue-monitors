@@ -1,8 +1,13 @@
 name: MISO ERAS Monitor
 
 # Schedule (in UTC, since GitHub Actions cron is UTC-only):
-# - Hourly checks from 9:00 AM to 7:00 PM Eastern Time (11 checks per day)
-# - One scheduled email at 1:00 PM ET (any change triggers an extra email)
+# - Hourly checks from 9:00 AM to 7:00 PM Eastern Time, Monday-Friday only
+# - One scheduled email at 1:00 PM ET on weekdays (any change triggers an extra email)
+#
+# Cron day-of-week field uses 1-5 = Mon-Fri. Note: this is in UTC, but since
+# our checks run 13:00-23:00 UTC (= 9am-7pm EDT), the UTC weekday matches
+# the ET weekday for every scheduled run. (If the schedule ever crossed
+# 00:00 UTC, day-of-week math would need a closer look.)
 #
 # DST handling: these UTC times are correct during EDT (UTC-4), which runs
 # mid-March through early November. When DST flips back to EST (UTC-5) in
@@ -14,17 +19,17 @@ name: MISO ERAS Monitor
 
 on:
   schedule:
-    - cron: "0 13 * * *"   # 9:00 AM ET (check only)
-    - cron: "0 14 * * *"   # 10:00 AM ET (check only)
-    - cron: "0 15 * * *"   # 11:00 AM ET (check only)
-    - cron: "0 16 * * *"   # 12:00 PM ET (check only)
-    - cron: "0 17 * * *"   # 1:00 PM ET (EMAIL)
-    - cron: "0 18 * * *"   # 2:00 PM ET (check only)
-    - cron: "0 19 * * *"   # 3:00 PM ET (check only)
-    - cron: "0 20 * * *"   # 4:00 PM ET (check only)
-    - cron: "0 21 * * *"   # 5:00 PM ET (check only)
-    - cron: "0 22 * * *"   # 6:00 PM ET (check only)
-    - cron: "0 23 * * *"   # 7:00 PM ET (check only)
+    - cron: "0 13 * * 1-5"   # 9:00 AM ET (check only)
+    - cron: "0 14 * * 1-5"   # 10:00 AM ET (check only)
+    - cron: "0 15 * * 1-5"   # 11:00 AM ET (check only)
+    - cron: "0 16 * * 1-5"   # 12:00 PM ET (check only)
+    - cron: "0 17 * * 1-5"   # 1:00 PM ET (EMAIL)
+    - cron: "0 18 * * 1-5"   # 2:00 PM ET (check only)
+    - cron: "0 19 * * 1-5"   # 3:00 PM ET (check only)
+    - cron: "0 20 * * 1-5"   # 4:00 PM ET (check only)
+    - cron: "0 21 * * 1-5"   # 5:00 PM ET (check only)
+    - cron: "0 22 * * 1-5"   # 6:00 PM ET (check only)
+    - cron: "0 23 * * 1-5"   # 7:00 PM ET (check only)
   workflow_dispatch:  # manual runs always send an email
 
 permissions:
@@ -96,5 +101,18 @@ jobs:
             echo "No snapshot or state changes to commit."
           else
             git commit -m "miso_eras: snapshot + state update"
-            git push
+            # Push with retry — if another workflow pushed in parallel, rebase and retry
+            for attempt in 1 2 3; do
+              if git push; then
+                echo "Push succeeded on attempt $attempt"
+                break
+              fi
+              echo "Push failed (attempt $attempt) — pulling latest and retrying"
+              git pull --rebase origin main
+              if [ "$attempt" = "3" ]; then
+                echo "Giving up after 3 attempts"
+                exit 1
+              fi
+              sleep 2
+            done
           fi
