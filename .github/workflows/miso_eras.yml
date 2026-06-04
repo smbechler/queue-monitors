@@ -57,7 +57,7 @@ jobs:
           if [ "$EVENT" = "workflow_dispatch" ]; then
             echo "Manual run — will email."
             echo "send_email=true" >> "$GITHUB_OUTPUT"
-          elif [ "$SCHEDULE" = "0 17 * * *" ]; then
+          elif [ "$SCHEDULE" = "0 17 * * 1-5" ]; then
             echo "Scheduled email time (1pm ET) — will email."
             echo "send_email=true" >> "$GITHUB_OUTPUT"
           else
