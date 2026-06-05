@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-06-04T16:21:58.005933+00:00",
-  "source_last_updated": "6/3/2026",
+  "captured_at": "2026-06-05T15:58:11.909323+00:00",
+  "source_last_updated": "6/4/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -8892,7 +8892,7 @@
       "State": "KS",
       "TO at POI": "SUNC",
       "In-Service Date": null,
-      "Commercial Operation Date": "12/31/2025",
+      "Commercial Operation Date": "4/20/2026",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "150",
@@ -8907,7 +8907,7 @@
       "Substation or Line": "115 kV Fort Dodge Substation",
       "Request Received": "10/6/2023",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/COMMERCIAL OPERATION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
