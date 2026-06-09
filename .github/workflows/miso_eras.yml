@@ -1,36 +1,16 @@
 name: MISO ERAS Monitor
 
-# Schedule (in UTC, since GitHub Actions cron is UTC-only):
-# - Hourly checks from 9:00 AM to 7:00 PM Eastern Time, Monday-Friday only
-# - One scheduled email at 1:00 PM ET on weekdays (any change triggers an extra email)
+# Once-daily check, 1pm Eastern Time, Monday-Friday only. Always emails —
+# even when no changes — as a heartbeat that confirms the monitor is running.
 #
-# Cron day-of-week field uses 1-5 = Mon-Fri. Note: this is in UTC, but since
-# our checks run 13:00-23:00 UTC (= 9am-7pm EDT), the UTC weekday matches
-# the ET weekday for every scheduled run. (If the schedule ever crossed
-# 00:00 UTC, day-of-week math would need a closer look.)
-#
-# DST handling: these UTC times are correct during EDT (UTC-4), which runs
-# mid-March through early November. When DST flips back to EST (UTC-5) in
-# November, add 1 to every hour value below.
-#
-# Note: GitHub Actions free-tier scheduled workflows can be delayed
-# 15-60+ minutes during peak hours. Treat the times below as targets,
-# not guarantees.
+# DST handling: during EDT (UTC-4), 1pm ET = 17:00 UTC. During EST (UTC-5),
+# 1pm ET = 18:00 UTC. When DST flips back to EST in November, change the
+# hour value from 17 to 18.
 
 on:
   schedule:
-    - cron: "0 13 * * 1-5"   # 9:00 AM ET (check only)
-    - cron: "0 14 * * 1-5"   # 10:00 AM ET (check only)
-    - cron: "0 15 * * 1-5"   # 11:00 AM ET (check only)
-    - cron: "0 16 * * 1-5"   # 12:00 PM ET (check only)
-    - cron: "0 17 * * 1-5"   # 1:00 PM ET (EMAIL)
-    - cron: "0 18 * * 1-5"   # 2:00 PM ET (check only)
-    - cron: "0 19 * * 1-5"   # 3:00 PM ET (check only)
-    - cron: "0 20 * * 1-5"   # 4:00 PM ET (check only)
-    - cron: "0 21 * * 1-5"   # 5:00 PM ET (check only)
-    - cron: "0 22 * * 1-5"   # 6:00 PM ET (check only)
-    - cron: "0 23 * * 1-5"   # 7:00 PM ET (check only)
-  workflow_dispatch:  # manual runs always send an email
+    - cron: "0 17 * * 1-5"   # 1:00 PM ET, Mon-Fri (change to 18 in winter)
+  workflow_dispatch:  # manual runs always work
 
 permissions:
   contents: write
@@ -43,27 +23,8 @@ jobs:
         run: |
           echo "UTC time:     $(date -u)"
           echo "Eastern time: $(TZ='America/New_York' date)"
+          echo "Day of week:  $(TZ='America/New_York' date +%A)"
           echo "Trigger:      ${{ github.event_name }}"
-          echo "Schedule:     ${{ github.event.schedule }}"
-
-      - name: Decide whether to send email
-        id: should_email
-        run: |
-          # Email-time cron schedule (1pm ET = 17:00 UTC during EDT).
-          # If the run was manually triggered, always email.
-          # If a change is detected, the script emails regardless of this flag.
-          SCHEDULE='${{ github.event.schedule }}'
-          EVENT='${{ github.event_name }}'
-          if [ "$EVENT" = "workflow_dispatch" ]; then
-            echo "Manual run — will email."
-            echo "send_email=true" >> "$GITHUB_OUTPUT"
-          elif [ "$SCHEDULE" = "0 17 * * 1-5" ]; then
-            echo "Scheduled email time (1pm ET) — will email."
-            echo "send_email=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Silent check — only emails if changes detected."
-            echo "send_email=false" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,37 +43,18 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
           MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
-          SEND_EMAIL: ${{ steps.should_email.outputs.send_email }}
         run: python monitors/miso_eras/monitor.py
 
-      - name: Commit updated snapshot and state
+      - name: Commit updated snapshot
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Add files individually so a missing file doesn't fail the whole step.
-          for f in monitors/miso_eras/snapshots/latest.json monitors/miso_eras/snapshots/state.json; do
-            if [ -f "$f" ]; then
-              git add "$f"
-            else
-              echo "Skipping $f (does not exist yet)"
-            fi
-          done
+          if [ -f "monitors/miso_eras/snapshots/latest.json" ]; then
+            git add monitors/miso_eras/snapshots/latest.json
+          fi
           if git diff --cached --quiet; then
-            echo "No snapshot or state changes to commit."
+            echo "No snapshot changes to commit."
           else
-            git commit -m "miso_eras: snapshot + state update"
-            # Push with retry — if another workflow pushed in parallel, rebase and retry
-            for attempt in 1 2 3; do
-              if git push; then
-                echo "Push succeeded on attempt $attempt"
-                break
-              fi
-              echo "Push failed (attempt $attempt) — pulling latest and retrying"
-              git pull --rebase origin main
-              if [ "$attempt" = "3" ]; then
-                echo "Giving up after 3 attempts"
-                exit 1
-              fi
-              sleep 2
-            done
+            git commit -m "miso_eras: snapshot update"
+            git push
           fi
