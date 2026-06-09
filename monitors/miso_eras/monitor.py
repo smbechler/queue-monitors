@@ -45,7 +45,7 @@ XLSX_PATTERN = r"ERAS[%20\s]+Interconnection[%20\s]+Requests\d+\.xlsx"
 HERE = Path(__file__).resolve().parent
 SNAPSHOT_DIR = HERE / "snapshots"
 LATEST_SNAPSHOT = SNAPSHOT_DIR / "latest.json"
-STATE_FILE = SNAPSHOT_DIR / "state.json"  # tracks checks-since-last-email
+STATE_FILE_LEGACY = SNAPSHOT_DIR / "state.json"  # legacy; no longer used. Safe to delete from repo.
 WORKDIR = HERE / "_workdir"
 
 # Fields that are noisy or expected to vary; ignored when diffing rows.
@@ -132,45 +132,82 @@ def _clean_value(value: Any) -> Any:
 
 
 def summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
-    """Compute counts broken out by carve-out category and request status.
+    """Compute counts broken out by carve-out category, plus per-cycle counts.
 
-    Returns a structure like:
+    Returns:
         {
-          "statuses": ["Active", "Done", "Under review", "Withdrawn"],
-          "regular": {"total": N, "by_status": {"Active": n, ...}},
-          "ipp":     {"total": N, "by_status": {"Active": n, ...}},
+          "by_carveout": [
+            {"label": "Regular",      "active": N, "total": N, "withdrawn": N},
+            {"label": "IPP",          "active": N, "total": N, "withdrawn": N},
+            {"label": "Under Review", "active": N, "total": N, "withdrawn": N},
+          ],
+          "by_cycle": [
+            {"label": "ERAS Study Cycle 1", "active": N, "total": N, "withdrawn": N},
+            ...
+          ],
         }
 
-    Status columns are discovered dynamically from the data, so a new
-    MISO status value shows up automatically without a code change.
-    Carve Out values other than "IPP" (including blank/N/A) count as Regular.
+    Carve Out matching is case-insensitive. Blank/missing values count as Regular.
     """
-    # Discover the set of statuses present, in a stable sorted order.
-    statuses = sorted(
-        {_status_of(p) for p in projects if _status_of(p)}
-    )
-
-    regular_by_status: dict[str, int] = {s: 0 for s in statuses}
-    ipp_by_status: dict[str, int] = {s: 0 for s in statuses}
-    regular_total = 0
-    ipp_total = 0
+    # Tally projects by carve-out category. Each entry: {"total", "withdrawn"}.
+    carveout_buckets = {
+        "Regular": {"total": 0, "withdrawn": 0},
+        "IPP": {"total": 0, "withdrawn": 0},
+        "Under Review": {"total": 0, "withdrawn": 0},
+    }
+    cycle_buckets: dict[str, dict[str, int]] = {}
 
     for p in projects:
-        status = _status_of(p)
-        if _is_ipp(p):
-            ipp_total += 1
-            if status in ipp_by_status:
-                ipp_by_status[status] += 1
-        else:
-            regular_total += 1
-            if status in regular_by_status:
-                regular_by_status[status] += 1
+        # Carve-out category (case-insensitive)
+        category = _carveout_category(p)
+        carveout_buckets[category]["total"] += 1
+        if _is_withdrawn(p):
+            carveout_buckets[category]["withdrawn"] += 1
 
-    return {
-        "statuses": statuses,
-        "regular": {"total": regular_total, "by_status": regular_by_status},
-        "ipp": {"total": ipp_total, "by_status": ipp_by_status},
-    }
+        # Study cycle bucket — blank cycle gets an explicit "(no cycle)" label
+        # so it's visible rather than silently dropped.
+        cycle = (p.get("Study Cycle") or "").strip() or "(no cycle)"
+        bucket = cycle_buckets.setdefault(cycle, {"total": 0, "withdrawn": 0})
+        bucket["total"] += 1
+        if _is_withdrawn(p):
+            bucket["withdrawn"] += 1
+
+    # Convert into ordered lists with derived "active" = total - withdrawn.
+    def _finalize(label: str, b: dict[str, int]) -> dict[str, Any]:
+        return {
+            "label": label,
+            "total": b["total"],
+            "withdrawn": b["withdrawn"],
+            "active": b["total"] - b["withdrawn"],
+        }
+
+    by_carveout = [
+        _finalize(label, carveout_buckets[label])
+        for label in ("Regular", "IPP", "Under Review")
+    ]
+    # Sort cycles alphabetically; (no cycle) goes last
+    cycle_labels = sorted(
+        cycle_buckets.keys(),
+        key=lambda c: (c == "(no cycle)", c.lower()),
+    )
+    by_cycle = [_finalize(c, cycle_buckets[c]) for c in cycle_labels]
+
+    return {"by_carveout": by_carveout, "by_cycle": by_cycle}
+
+
+def _carveout_category(project: dict[str, Any]) -> str:
+    """Return one of: 'Regular', 'IPP', 'Under Review'.
+
+    Matching is case-insensitive on the Carve Out Requested column.
+    Blank/None/'N/A' all count as Regular.
+    """
+    raw = (project.get("Carve Out Requested") or "").strip().lower()
+    if raw == "ipp":
+        return "IPP"
+    if raw == "under review":
+        return "Under Review"
+    # Everything else (blank, "N/A", or any unrecognized value) → Regular
+    return "Regular"
 
 
 def _status_of(project: dict[str, Any]) -> str:
@@ -182,7 +219,7 @@ def _is_withdrawn(project: dict[str, Any]) -> bool:
 
 
 def _is_ipp(project: dict[str, Any]) -> bool:
-    return (project.get("Carve Out Requested") or "").upper() == "IPP"
+    return (project.get("Carve Out Requested") or "").strip().lower() == "ipp"
 
 
 # ---------------------------------------------------------------------------
@@ -219,23 +256,6 @@ def previous_capture_time() -> str | None:
         return None
 
 
-def load_state() -> dict[str, Any]:
-    """Load the run-state file. Tracks counter of checks since last email."""
-    if not STATE_FILE.exists():
-        return {"checks_since_last_email": 0, "last_email_at": None}
-    try:
-        with STATE_FILE.open("r") as f:
-            return json.load(f)
-    except Exception:  # noqa: BLE001
-        return {"checks_since_last_email": 0, "last_email_at": None}
-
-
-def save_state(state: dict[str, Any]) -> None:
-    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
-    with STATE_FILE.open("w") as f:
-        json.dump(state, f, indent=2)
-
-
 # ---------------------------------------------------------------------------
 # Email formatting
 # ---------------------------------------------------------------------------
@@ -248,12 +268,10 @@ def format_email(
     previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
-    checks_since_last_email: int,
-    is_change_alert: bool,
 ) -> tuple[str, str]:
     """Return (subject, html_body)."""
     # Subject line packs the most important info
-    total = counts["regular"]["total"] + counts["ipp"]["total"]
+    total = sum(row["total"] for row in counts["by_carveout"])
     if diff is None:
         subject = f"MISO ERAS — initial snapshot ({total} projects)"
     elif diff.has_changes:
@@ -264,15 +282,11 @@ def format_email(
             bits.append(f"-{len(diff.removed)}")
         if diff.changed:
             bits.append(f"~{len(diff.changed)}")
-        prefix = "MISO ERAS [CHANGE]" if is_change_alert else "MISO ERAS"
-        subject = f"{prefix} — {' '.join(bits)} | total {total}"
+        subject = f"MISO ERAS — {' '.join(bits)} | total {total}"
     else:
         subject = f"MISO ERAS — no changes | total {total}"
 
-    html = _render_html(
-        counts, diff, current, previous, xlsx_url, last_check,
-        checks_since_last_email,
-    )
+    html = _render_html(counts, diff, current, previous, xlsx_url, last_check)
     return subject, html
 
 
@@ -283,7 +297,6 @@ def _render_html(
     previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
-    checks_since_last_email: int,
 ) -> str:
     parts: list[str] = []
     parts.append(
@@ -291,20 +304,10 @@ def _render_html(
         "max-width:680px;color:#222;'>"
     )
     parts.append("<h2 style='margin-bottom:4px;'>MISO ERAS Queue Update</h2>")
-    # checks_since_last_email is the number of checks performed since the
-    # previous email, INCLUDING this one. So "1" = just this run, no extras.
-    if checks_since_last_email <= 1:
-        check_msg = "First check since last email."
-    else:
-        check_msg = (
-            f"{checks_since_last_email} checks performed since last email "
-            f"(including this one)."
-        )
     parts.append(
         f"<p style='color:#666;margin-top:0;font-size:13px;'>"
         f"Checked at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}"
-        + (f" · last check: {last_check}" if last_check else "")
-        + f"<br>{check_msg}"
+        + (f" · previous check: {last_check}" if last_check else "")
         + "</p>"
     )
 
@@ -349,54 +352,46 @@ def _render_html(
 
 
 def _counts_table(counts: dict[str, Any]) -> str:
-    """Two-row summary: Regular vs IPP, broken out by request status.
+    """Render both summary tables: by carve-out category and by ERAS cycle.
 
-    Columns: category label, Total, Total − Withdrawn, then one column
-    per status discovered in the data.
+    Each table has the same column shape: label, Active, Total, Withdrawn.
     """
-    statuses = counts["statuses"]
+    parts: list[str] = []
+    parts.append(_breakdown_table("By Carve Out Category", counts["by_carveout"]))
+    parts.append(
+        "<div style='height:16px;'></div>"
+    )  # spacer between tables
+    parts.append(_breakdown_table("By Study Cycle", counts["by_cycle"]))
+    return "".join(parts)
 
-    # Header row
-    header_cells = [
-        "<th style='text-align:left;padding:6px 12px;border-bottom:2px solid #ccc;'></th>",
-        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total</th>",
-        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total − Withdrawn</th>",
-    ]
-    for status in statuses:
-        header_cells.append(
-            f"<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>"
-            f"{_esc(status)}</th>"
-        )
 
-    def _row(label: str, data: dict[str, Any]) -> str:
-        total = data["total"]
-        by_status = data["by_status"]
-        # "Total − Withdrawn": everything in this category not in a
-        # Withdrawn status. We compute it from the per-status counts.
-        withdrawn = sum(
-            n for s, n in by_status.items() if s.lower() == "withdrawn"
-        )
-        not_withdrawn = total - withdrawn
-        cells = [
-            f"<td style='padding:6px 12px;font-weight:600;'>{_esc(label)}</td>",
-            f"<td style='padding:6px 12px;text-align:right;'>{total}</td>",
-            f"<td style='padding:6px 12px;text-align:right;'>{not_withdrawn}</td>",
-        ]
-        for status in statuses:
-            cells.append(
-                f"<td style='padding:6px 12px;text-align:right;'>"
-                f"{by_status.get(status, 0)}</td>"
-            )
-        return "<tr>" + "".join(cells) + "</tr>"
-
-    html = (
-        "<table style='border-collapse:collapse;font-size:14px;'>"
-        "<thead><tr>" + "".join(header_cells) + "</tr></thead><tbody>"
-        + _row("Regular", counts["regular"])
-        + _row("IPP", counts["ipp"])
-        + "</tbody></table>"
+def _breakdown_table(heading: str, rows: list[dict[str, Any]]) -> str:
+    """Render a single table with columns: label, Active, Total, Withdrawn."""
+    parts: list[str] = []
+    parts.append(
+        f"<h4 style='margin:8px 0 6px 0;font-size:14px;color:#444;'>"
+        f"{_esc(heading)}</h4>"
     )
-    return html
+    parts.append("<table style='border-collapse:collapse;font-size:14px;'>")
+    parts.append(
+        "<thead><tr>"
+        "<th style='text-align:left;padding:6px 12px;border-bottom:2px solid #ccc;'></th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Active</th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total</th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Withdrawn</th>"
+        "</tr></thead><tbody>"
+    )
+    for row in rows:
+        parts.append(
+            "<tr>"
+            f"<td style='padding:6px 12px;font-weight:600;'>{_esc(row['label'])}</td>"
+            f"<td style='padding:6px 12px;text-align:right;font-weight:600;'>{row['active']}</td>"
+            f"<td style='padding:6px 12px;text-align:right;'>{row['total']}</td>"
+            f"<td style='padding:6px 12px;text-align:right;color:#888;'>{row['withdrawn']}</td>"
+            "</tr>"
+        )
+    parts.append("</tbody></table>")
+    return "".join(parts)
 
 
 # ---------------------------------------------------------------------------
@@ -533,13 +528,6 @@ def main() -> int:
         print("ERROR: MONITOR_TO_ADDR not set", file=sys.stderr)
         return 2
 
-    # SEND_EMAIL is set to "true" by the workflow on scheduled-email times
-    # (10am, 3pm, 6pm ET) and on manual runs. Otherwise we still check and
-    # diff, but only email if there's an actual change to report.
-    is_scheduled_email_time = (
-        os.environ.get("SEND_EMAIL", "").lower() == "true"
-    )
-
     try:
         WORKDIR.mkdir(parents=True, exist_ok=True)
 
@@ -565,54 +553,19 @@ def main() -> int:
                 previous, projects, id_field="id", ignore_fields=IGNORE_FIELDS
             )
 
-        # Decide whether to email:
-        # - Yes, if this is a scheduled-email time (10am/3pm/6pm or manual)
-        # - Yes, if it's the initial snapshot (no previous data)
-        # - Yes, if anything changed since the last check
-        # - Otherwise, just check silently and update the counter
-        has_changes = diff is not None and diff.has_changes
-        is_initial = diff is None
-        send = is_scheduled_email_time or has_changes or is_initial
-        is_change_alert = has_changes and not is_scheduled_email_time
-
-        # Update the check counter. It tracks checks since the last email,
-        # including the current one.
-        state = load_state()
-        state["checks_since_last_email"] = (
-            state.get("checks_since_last_email", 0) + 1
+        last_check = previous_capture_time()
+        subject, html = format_email(
+            counts, diff, projects, previous, xlsx_url, last_check
         )
 
-        last_check = previous_capture_time()
-
-        if send:
-            subject, html = format_email(
-                counts,
-                diff,
-                projects,
-                previous,
-                xlsx_url,
-                last_check,
-                checks_since_last_email=state["checks_since_last_email"],
-                is_change_alert=is_change_alert,
-            )
-            print(f"[{MONITOR_NAME}] sending email: {subject}")
-            notify.send_email(to=recipient, subject=subject, html=html)
-            # Reset counter after a successful email
-            state["checks_since_last_email"] = 0
-            state["last_email_at"] = datetime.now(timezone.utc).isoformat()
-        else:
-            print(
-                f"[{MONITOR_NAME}] silent check "
-                f"(#{state['checks_since_last_email']} since last email) — "
-                f"no scheduled email, no changes"
-            )
+        print(f"[{MONITOR_NAME}] sending email: {subject}")
+        notify.send_email(to=recipient, subject=subject, html=html)
 
         save_snapshot(projects, xlsx_url)
-        save_state(state)
-        print(f"[{MONITOR_NAME}] snapshot + state saved")
+        print(f"[{MONITOR_NAME}] snapshot saved")
         return 0
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         tb = traceback.format_exc()
         print(tb, file=sys.stderr)
         notify.send_failure_alert(recipient, MONITOR_NAME, tb)
