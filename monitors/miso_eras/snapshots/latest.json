@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-06-10T19:31:41.183887+00:00",
+  "captured_at": "2026-06-11T19:32:22.277372+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
@@ -1772,16 +1772,16 @@
       "id": "100186"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0060",
       "Application ID": 100381,
       "Interconnection Customer": "D/B/A Missouri Electric Commission",
-      "Request Status": "Under review",
+      "Request Status": "Active",
       "Order Submitted": 62,
       "Submission Time": "2026-04-10-20:21",
       "Date Withdrawn": null,
       "Application In Service Date": "2029-04-01T00:00:00",
       "Transmission Owner": "Ameren Missouri",
-      "County": null,
+      "County": "Marion",
       "State": "MO",
       "Study Cycle": "TBD",
       "Service Type": "NRIS",
