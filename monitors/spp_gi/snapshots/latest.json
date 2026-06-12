@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-06-11T16:57:44.077775+00:00",
-  "source_last_updated": "6/10/2026",
+  "captured_at": "2026-06-12T16:22:58.949819+00:00",
+  "source_last_updated": "6/11/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -28330,7 +28330,7 @@
       "Cluster Group": null,
       "Nearest Town or County": "Houston",
       "State": "TX",
-      "TO at POI": "SPS",
+      "TO at POI": "NEET",
       "In-Service Date": "1/31/2030",
       "Commercial Operation Date": "2/28/2030",
       "Cessation Date": "5/31/2030",
