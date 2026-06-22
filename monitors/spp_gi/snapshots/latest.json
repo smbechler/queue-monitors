@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-06-19T16:09:40.932749+00:00",
-  "source_last_updated": "6/18/2026",
+  "captured_at": "2026-06-22T17:41:45.215686+00:00",
+  "source_last_updated": "6/22/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -4392,7 +4392,7 @@
       "State": "OK",
       "TO at POI": "OG&E",
       "In-Service Date": null,
-      "Commercial Operation Date": null,
+      "Commercial Operation Date": "12/31/2027",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "200",
@@ -4407,7 +4407,7 @@
       "Substation or Line": "Interconnecting at Hugo - Sunnyside 345 kV transmission line",
       "Request Received": "2/20/2024",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
