@@ -1,19 +1,14 @@
 name: SPP DPNS Monitor
 
-# Weekly check, Mondays at 10:00 AM Eastern. Runs the monitor for BOTH
-# 2025 and 2026 in sequence — you get one email per year. Always emails
-# (heartbeat), noting any new DPNS study postings or "none new".
-#
-# 2025 is a past/reference year (DPNS_HISTORICAL suppresses the stale-year
-# nag). 2026 is the current year being watched for new postings.
+# Weekly check, Mondays at 10:00 AM Eastern. Fetches BOTH 2025 and 2026
+# (configured in the YEARS list inside monitor.py) and sends ONE combined
+# email with a section per year. Always emails (heartbeat).
 #
 # DST handling: during EDT (UTC-4), 10am ET = 14:00 UTC. During EST (UTC-5),
 # 10am ET = 15:00 UTC. Change "14" to "15" when DST flips back in November.
 #
-# When 2026 ends and you want to watch 2027: find 2027's yearTypeId (open the
-# DPNS page, pick 2027 from the dropdown, copy the number from the URL), then
-# add another "Run monitor (2027)" step below modeled on the 2026 one. You can
-# leave 2025/2026 steps in place or remove them as you like.
+# To change which years are watched, edit the YEARS list at the top of
+# monitors/spp_dpns/monitor.py (no workflow change needed).
 
 on:
   schedule:
@@ -45,40 +40,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ----- 2025 (historical / reference year) -----
-      - name: Run monitor (2025)
+      - name: Run monitor
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
           MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
-          DPNS_YEAR: "2025"
-          DPNS_YEAR_TYPE_ID: "249"
-          DPNS_HISTORICAL: "true"
-        run: python monitors/spp_dpns/monitor.py
-
-      # ----- 2026 (current year) -----
-      # `if: always()` ensures 2026 still runs even if the 2025 step fails,
-      # so one year's hiccup doesn't suppress the other's email.
-      - name: Run monitor (2026)
-        if: always()
-        env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          MONITOR_TO_ADDR: ${{ secrets.MONITOR_TO_ADDR }}
-          MONITOR_FROM_ADDR: ${{ secrets.MONITOR_FROM_ADDR }}
-          DPNS_YEAR: "2026"
-          DPNS_YEAR_TYPE_ID: "259"
         run: python monitors/spp_dpns/monitor.py
 
       - name: Commit updated seen-sets
-        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Add both years' seen-sets if present
-          for f in monitors/spp_dpns/snapshots/seen_2025.json monitors/spp_dpns/snapshots/seen_2026.json; do
-            if [ -f "$f" ]; then
-              git add "$f"
-            fi
+          for f in monitors/spp_dpns/snapshots/seen_*.json; do
+            [ -f "$f" ] && git add "$f"
           done
           if git diff --cached --quiet; then
             echo "No seen-set changes to commit."
