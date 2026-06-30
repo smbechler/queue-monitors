@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-06-29T16:39:34.505637+00:00",
+  "captured_at": "2026-06-30T15:33:17.982728+00:00",
   "source_last_updated": "6/29/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
@@ -28412,36 +28412,6 @@
       "JTIQ Commitment": null,
       "Cause of Delay": null,
       "id": "24-03011"
-    },
-    {
-      "Generation Interconnection Number": "23-05032",
-      "IFS Queue Number": null,
-      "Current Cluster": "RTOE Transitional Cluster",
-      "Cluster Group": null,
-      "Nearest Town or County": "Fort Collins",
-      "State": "CO",
-      "TO at POI": "PRPA",
-      "In-Service Date": "1/1/2026",
-      "Commercial Operation Date": "1/1/2026",
-      "Cessation Date": null,
-      "Original Generator Commercial Op Date": null,
-      "Capacity": "50",
-      "MAX Summer MW": "50",
-      "MAX Winter MW": "50",
-      "Service Type": "ER",
-      "Requested Maximum Injection Capability (MW)": "0",
-      "Requested Network Resource Deliverability (MW)": "0",
-      "Nameplate Capacity": "0",
-      "Generation Type": "Battery/Storage",
-      "Fuel Type": null,
-      "Substation or Line": "Ault-Carey 230",
-      "Request Received": "5/3/2023",
-      "Date Withdrawn": null,
-      "Status": "DISIS STAGE",
-      "JTIQ Participant": null,
-      "JTIQ Commitment": null,
-      "Cause of Delay": null,
-      "id": "23-05032"
     },
     {
       "Generation Interconnection Number": "22-07251",
