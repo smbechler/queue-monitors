@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-07-07T18:59:00.425199+00:00",
+  "captured_at": "2026-07-07T19:47:44.366273+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
@@ -1708,7 +1708,7 @@
       "Requested ERIS MW": 500,
       "Requested NRIS MW": 500,
       "MW Range of Need": "500-600",
-      "Location of Need": "Livingstone Parish County",
+      "Location of Need": "Livingstone Parish County LRZ 9",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Steamboat Energy Storage is a 500 MW, 4-hour battery energy storage system in Livingston Parish, LA interconnecting into Entergy\u2019s Willow Glen to Coly 500kV system. The project is in MISO Zone 9, within the transmission and generation constrained Amite South load pocket. The project will support the new, incremental load of a commercial entity in need of 330-360 MW of capacity, and this 500 MW storage project will directly serve a portion of the long-term resource adequacy needs of the load.",
       "id": "100259"
@@ -1969,7 +1969,7 @@
       "Requested ERIS MW": 500,
       "Requested NRIS MW": 500,
       "MW Range of Need": "500-600",
-      "Location of Need": "Sullivan County LRZ 6",
+      "Location of Need": "McCracken County LRZ 6",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Merom Energy Storage will address a commercial need for new load in Kentucky. This storage project is intended to come online for the MISO 2028/2029 Planning Year, to address a portion of the long-term resource adequacy deficiency that would be caused by coming online in the same Planning Year.",
       "id": "100481"
@@ -2027,7 +2027,7 @@
       "Requested ERIS MW": 155,
       "Requested NRIS MW": 155,
       "MW Range of Need": "100-200",
-      "Location of Need": "Webster County LRZ 6",
+      "Location of Need": "McCracken County LRZ 6",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Tradewater Energy Storage will address a commercial need for new load in Kentucky. This 155 MW of storage project is intended to come online for the MISO 2028/2029 Planning Year, to address a portion of the long-term resource adequacy deficiency that would be caused by coming online in the same Planning Year.",
       "id": "100486"
@@ -2056,10 +2056,39 @@
       "Requested ERIS MW": 750,
       "Requested NRIS MW": 750,
       "MW Range of Need": "700-1000",
-      "Location of Need": "Iberville County LRZ 9",
+      "Location of Need": "Livingstone Parish County LRZ 9",
       "Carve Out Requested": "IPP",
       "Non-Confidential Summary": "Bayou Point Natural Gas is a 750 MW Combined-Cycle Natural Gas Power Plant in Iberville Parish, LA interconnecting into Entergy\u2019s new 500 kV River Plex substation. The project is in MISO Zone 9, within the transmission and generation constrained Amite South load pocket. The project will help support the new, incremental load of a commercial entity in need of up to 700 - 1000 MW of capacity, and this 750 MW gas project will directly serve a portion of the long-term resource adequacy needs of the load.",
       "id": "100535"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100378,
+      "Interconnection Customer": "Maple Creek Energy LLC",
+      "Request Status": "Under review",
+      "Order Submitted": 72,
+      "Submission Time": "2026-07-07- 9:11",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2028-10-01T00:00:00",
+      "Transmission Owner": "Duke Energy IN",
+      "County": "Sullivan",
+      "State": "IN",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "Merom (HED) - Dresser 345.0kV",
+      "Max Summer MW": 659.102,
+      "Max Winter MW": 659.102,
+      "Fuel Type": "Gas",
+      "Generating Facility": "Combined Cycle Gas Turbine (CCGT)",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 641.8,
+      "Requested NRIS MW": 641.8,
+      "MW Range of Need": "200-300",
+      "Location of Need": "Sullivan LRZ 6",
+      "Carve Out Requested": "IPP",
+      "Non-Confidential Summary": "Maple Creek Energy LLC is proposing a new 641.8 MW natural gas electric generating facility to be located in Sullivan County, Indiana. The Project will serve the identi\ufb01ed need in MISO\u2019s Local Resource Zone 6 (\u201cLRZ 6\u201d).",
+      "id": "100378"
     }
   ]
 }
