@@ -44,6 +44,17 @@ YEARS: list[dict[str, Any]] = [
     {"year": 2025, "year_type_id": 249, "current": False},
 ]
 
+# ---------------------------------------------------------------------------
+# Delivery Point Assessment (DPA) monthly reports — a SEPARATE listing from
+# the DPNS studies above. This is the "Delivery Point Assessment File Listing"
+# page, which posts one Excel report per month.
+#   DPA_YEAR / DPA_YEAR_TYPE_ID: the year and its OpsPortal id (2026 -> 258).
+# Known DPA year -> yearTypeId: 2026 -> 258.
+# ---------------------------------------------------------------------------
+
+DPA_YEAR = 2026
+DPA_YEAR_TYPE_ID = 258
+
 MONITOR_NAME = "SPP DPNS"
 LANDING_URL = "https://opsportal.spp.org/Studies/DPNS"
 
@@ -108,6 +119,113 @@ def _parse_study_name(url: str) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# Delivery Point Assessment (DPA) monthly reports — fetch + parse
+# ---------------------------------------------------------------------------
+
+
+def _dpa_page_url() -> str:
+    return f"https://opsportal.spp.org/Studies/DeliveryList?yearTypeId={DPA_YEAR_TYPE_ID}"
+
+
+def _dpa_seen_file() -> Path:
+    return SNAPSHOT_DIR / f"dpa_seen_{DPA_YEAR}.json"
+
+
+# Matches the monthly Excel report links, e.g.:
+#   .../2026_DeliveryPoint_Studies/Preliminary Assessment Posting January 2026.xlsx
+_DPA_LINK_RE = re.compile(
+    r'href=["\']([^"\']*?/[^"\']*?Preliminary[%20\s]+Assessment[^"\']*?\.xlsx)["\']',
+    re.IGNORECASE,
+)
+
+# Month order for sorting "most recent" correctly (filenames contain month names).
+_MONTH_ORDER = {
+    m: i
+    for i, m in enumerate(
+        [
+            "january", "february", "march", "april", "may", "june",
+            "july", "august", "september", "october", "november", "december",
+        ],
+        start=1,
+    )
+}
+
+
+def fetch_dpa_reports() -> list[dict[str, str]]:
+    """Fetch the Delivery Point Assessment listing and extract monthly reports.
+
+    Returns a list of {"id", "url", "title", "month_num"}, sorted newest first.
+    """
+    resp = fetch.get(_dpa_page_url())
+    html = resp.text
+
+    reports: list[dict[str, str]] = []
+    seen_urls: set[str] = set()
+
+    for match in _DPA_LINK_RE.finditer(html):
+        raw_url = match.group(1)
+        if raw_url.startswith("//"):
+            url = "https:" + raw_url
+        elif raw_url.startswith("/"):
+            url = "https://opsportal.spp.org" + raw_url
+        else:
+            url = raw_url
+
+        if url in seen_urls:
+            continue
+        seen_urls.add(url)
+
+        # Filename like "Preliminary Assessment Posting January 2026.xlsx"
+        filename = url.rsplit("/", 1)[-1].replace("%20", " ").strip()
+        title = filename[:-5] if filename.lower().endswith(".xlsx") else filename
+
+        # Extract the month for sorting and for a stable id
+        month_num = 0
+        report_id = title  # fallback
+        mth = re.search(
+            r"(january|february|march|april|may|june|july|august|"
+            r"september|october|november|december)\s*" + str(DPA_YEAR),
+            filename,
+            re.IGNORECASE,
+        )
+        if mth:
+            month_name = mth.group(1).lower()
+            month_num = _MONTH_ORDER.get(month_name, 0)
+            report_id = f"DPA-{DPA_YEAR}-{month_name.capitalize()}"
+
+        reports.append(
+            {"id": report_id, "url": url, "title": title, "month_num": month_num}
+        )
+
+    # Sort newest first (highest month number first)
+    reports.sort(key=lambda r: r["month_num"], reverse=True)
+    return reports
+
+
+def load_dpa_seen() -> set[str]:
+    f = _dpa_seen_file()
+    if not f.exists():
+        return set()
+    try:
+        with f.open("r") as fh:
+            return set(json.load(fh).get("report_ids", []))
+    except Exception:  # noqa: BLE001
+        return set()
+
+
+def save_dpa_seen(report_ids: set[str]) -> None:
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "year": DPA_YEAR,
+        "count": len(report_ids),
+        "report_ids": sorted(report_ids),
+    }
+    with _dpa_seen_file().open("w") as fh:
+        json.dump(payload, fh, indent=2)
+
+
+# ---------------------------------------------------------------------------
 # Seen-set I/O
 # ---------------------------------------------------------------------------
 
@@ -160,15 +278,27 @@ def _year_end_warning(year_cfg: dict[str, Any]) -> str | None:
     return None
 
 
-def build_combined_email(per_year: list[dict[str, Any]]) -> tuple[str, str]:
+def build_combined_email(
+    per_year: list[dict[str, Any]],
+    dpa_reports: list[dict[str, str]],
+    dpa_new: list[dict[str, str]],
+) -> tuple[str, str]:
     total_new = sum(len(y["new"]) for y in per_year)
+    dpa_new_count = len(dpa_new)
 
+    subject_bits = []
     if total_new > 0:
-        new_bits = [f"{y['cfg']['year']}: +{len(y['new'])}" for y in per_year if y["new"]]
-        subject = f"SPP DPNS — new studies ({', '.join(new_bits)})"
+        subject_bits += [
+            f"{y['cfg']['year']}: +{len(y['new'])}" for y in per_year if y["new"]
+        ]
+    if dpa_new_count > 0:
+        subject_bits.append(f"DPA: +{dpa_new_count}")
+
+    if subject_bits:
+        subject = f"SPP DPNS — new ({', '.join(subject_bits)})"
     else:
         years_str = "/".join(str(y["cfg"]["year"]) for y in per_year)
-        subject = f"SPP DPNS {years_str} — no new studies"
+        subject = f"SPP DPNS {years_str} — no new studies or reports"
 
     parts: list[str] = []
     parts.append(
@@ -229,8 +359,53 @@ def build_combined_email(per_year: list[dict[str, Any]]) -> tuple[str, str]:
             f"<a href='{_page_url(cfg['year_type_id'])}'>View {year} DPNS page</a></p>"
         )
 
+    # ---- Delivery Point Assessment (DPA) monthly reports section ----
+    parts.append(
+        f"<h3 style='margin-top:28px;border-bottom:2px solid #eee;"
+        f"padding-bottom:4px;'>Delivery Point Assessment reports ({DPA_YEAR}) — "
+        f"{len(dpa_reports)} posted, {len(dpa_new)} new</h3>"
+    )
+    if dpa_new:
+        parts.append(
+            "<p style='font-size:13px;margin:6px 0;'><strong>New since last check:</strong></p>"
+        )
+        parts.append(_dpa_list(dpa_new))
+
+    if dpa_reports:
+        # Always highlight the most recent report (first, since sorted newest-first)
+        most_recent = dpa_reports[0]
+        parts.append(
+            f"<p style='font-size:13px;margin:10px 0 4px;'>"
+            f"<strong>Most recent report:</strong> "
+            f"<a href='{_esc(most_recent['url'])}'>{_esc(most_recent['title'])}</a></p>"
+        )
+        parts.append(
+            "<p style='font-size:13px;color:#666;margin:10px 0 4px;'>All reports:</p>"
+        )
+        parts.append(_dpa_list(dpa_reports))
+    else:
+        parts.append(
+            f"<p style='font-size:14px;'>No Delivery Point Assessment reports "
+            f"posted for {DPA_YEAR} yet.</p>"
+        )
+    parts.append(
+        f"<p style='font-size:12px;margin-top:4px;'>"
+        f"<a href='{_dpa_page_url()}'>View {DPA_YEAR} Delivery Point Assessment listing</a></p>"
+    )
+
     parts.append("</div>")
     return subject, "".join(parts)
+
+
+def _dpa_list(reports: list[dict[str, str]]) -> str:
+    items = []
+    for r in reports:
+        items.append(
+            f"<li style='margin-bottom:6px;'>"
+            f"<a href='{_esc(r['url'])}' style='font-weight:600;'>{_esc(r['title'])}</a>"
+            f"</li>"
+        )
+    return "<ul style='font-size:14px;padding-left:20px;'>" + "".join(items) + "</ul>"
 
 
 def _study_list(studies: list[dict[str, str]], highlight: bool) -> str:
@@ -278,7 +453,17 @@ def main() -> int:
             print(f"[{MONITOR_NAME}]   {len(new_studies)} new for {year}")
             per_year.append({"cfg": cfg, "all": studies, "new": new_studies})
 
-        subject, html = build_combined_email(per_year)
+        # Fetch the Delivery Point Assessment monthly reports
+        print(f"[{MONITOR_NAME}] fetching DPA reports ({_dpa_page_url()})…")
+        dpa_reports = fetch_dpa_reports()
+        print(f"[{MONITOR_NAME}]   found {len(dpa_reports)} DPA reports for {DPA_YEAR}")
+        for r in dpa_reports:
+            print(f"[{MONITOR_NAME}]     {r['title']}")
+        dpa_seen = load_dpa_seen()
+        dpa_new = [r for r in dpa_reports if r["id"] not in dpa_seen]
+        print(f"[{MONITOR_NAME}]   {len(dpa_new)} new DPA reports")
+
+        subject, html = build_combined_email(per_year, dpa_reports, dpa_new)
         print(f"[{MONITOR_NAME}] sending email: {subject}")
         notify.send_email(to=recipient, subject=subject, html=html)
 
@@ -287,6 +472,9 @@ def main() -> int:
             seen = load_seen(year)
             seen.update(s["id"] for s in y["all"])
             save_seen(year, seen)
+        # Save DPA seen-set
+        dpa_seen.update(r["id"] for r in dpa_reports)
+        save_dpa_seen(dpa_seen)
         print(f"[{MONITOR_NAME}] seen-sets updated")
         return 0
 
