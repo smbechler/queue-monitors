@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-07-09T16:01:32.712783+00:00",
-  "source_last_updated": "7/8/2026",
+  "captured_at": "2026-07-10T15:34:10.293876+00:00",
+  "source_last_updated": "7/10/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -4065,9 +4065,9 @@
       "Commercial Operation Date": "12/1/2029",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
-      "Capacity": "130",
-      "MAX Summer MW": "130",
-      "MAX Winter MW": "130",
+      "Capacity": "125",
+      "MAX Summer MW": "125",
+      "MAX Winter MW": "125",
       "Service Type": "ER",
       "Requested Maximum Injection Capability (MW)": "0",
       "Requested Network Resource Deliverability (MW)": "0",
