@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-07-10T15:34:10.293876+00:00",
+  "captured_at": "2026-07-13T15:43:54.677399+00:00",
   "source_last_updated": "7/10/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
@@ -11367,7 +11367,7 @@
       "Substation or Line": "Battlefield BESS 161kV",
       "Request Received": "2/21/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -13137,7 +13137,7 @@
       "Substation or Line": "Western Farmers 138kV Mooreland Substation",
       "Request Received": "5/14/2021",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
