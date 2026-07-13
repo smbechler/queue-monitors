@@ -147,7 +147,38 @@ def fetch_filings(year: str, month_label: str) -> list[dict[str, str]]:
         print(f"[{MONITOR_NAME}] querying from={from_offset} size={page_size}…")
         resp = fetch.post_json(SEARCH_URL, json_body=payload)
 
+        # Defensive: the API sometimes returns a string (an error page, a
+        # rate-limit notice, or JSON-encoded-as-a-string). If it's a string,
+        # try to parse it as JSON; if that fails, log a snippet and stop.
+        if isinstance(resp, str):
+            print(
+                f"[{MONITOR_NAME}]   response came back as a string "
+                f"(len={len(resp)}); first 300 chars: {resp[:300]!r}"
+            )
+            try:
+                resp = json.loads(resp)
+            except Exception:  # noqa: BLE001
+                print(
+                    f"[{MONITOR_NAME}]   could not parse response as JSON; "
+                    f"stopping. MISO may have returned an error page."
+                )
+                break
+
+        if not isinstance(resp, dict):
+            print(
+                f"[{MONITOR_NAME}]   unexpected response type "
+                f"{type(resp).__name__}; stopping."
+            )
+            break
+
         hits_obj = resp.get("hits", {})
+        # `hits` itself may be malformed in an error response
+        if not isinstance(hits_obj, dict):
+            print(
+                f"[{MONITOR_NAME}]   'hits' was {type(hits_obj).__name__}, "
+                f"expected dict; stopping."
+            )
+            break
         hits = hits_obj.get("hits", [])
         total = hits_obj.get("total", 0)
 
