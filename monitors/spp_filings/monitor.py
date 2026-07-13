@@ -47,6 +47,11 @@ MONITOR_NAME = "SPP Documents & Filings"
 # folder's id (visible in the page URL when you navigate to it).
 FOLDER_ID = "544714"
 
+# Show only the N most recently-added entries. SPP assigns each record a
+# numeric id sequentially as it's created, so the highest ids are the newest
+# additions. We sort by that id (descending) and keep the top N.
+TOP_N = 10
+
 BASE_URL = "https://www.spp.org/spp-documents-filings/"
 PAGE_URL = f"{BASE_URL}?id={FOLDER_ID}"
 
@@ -227,6 +232,32 @@ def parse_documents(page_html: str) -> list[dict[str, str]]:
     return unique
 
 
+def _recency_key(entry: dict[str, str]) -> int:
+    """Numeric sort key approximating recency.
+
+    SPP assigns each record a sequential numeric id when it's created, so a
+    higher id means the record was added more recently. We pull that number
+    out of the entry's stable id ('id:NNN') or, for PDFs, out of the trailing
+    digits SPP appends to the document filename/url. Entries with no number
+    sort last (key 0).
+    """
+    sid = entry.get("id", "")
+    m = re.match(r"id:(\d+)", sid)
+    if m:
+        return int(m.group(1))
+    # PDF fallback: SPP appends the record number before .pdf, e.g. "...GIA766694.pdf"
+    url = entry.get("url", "")
+    m2 = re.search(r"(\d{5,})\.pdf$", url)
+    if m2:
+        return int(m2.group(1))
+    return 0
+
+
+def most_recent(entries: list[dict[str, str]], n: int) -> list[dict[str, str]]:
+    """Return the n most recently-added entries, newest first."""
+    return sorted(entries, key=_recency_key, reverse=True)[:n]
+
+
 # ---------------------------------------------------------------------------
 # Fetch
 # ---------------------------------------------------------------------------
@@ -291,7 +322,7 @@ def format_email(
     parts.append(
         f"<p style='color:#666;margin-top:0;font-size:13px;'>"
         f"Checked at {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} · "
-        f"{len(docs)} filing{'s' if len(docs) != 1 else ''} in this folder · "
+        f"showing the {len(docs)} most recently added · "
         f"<strong>{new_count} new since last check</strong>"
         f"</p>"
     )
@@ -300,7 +331,7 @@ def format_email(
         parts.append("<h3>New filings</h3>")
         parts.append(_doc_list(new_docs, highlight=True))
 
-    parts.append("<h3 style='margin-top:20px;'>All filings</h3>")
+    parts.append("<h3 style='margin-top:20px;'>Most recent filings</h3>")
     if docs:
         parts.append(_doc_list(docs, highlight=False))
     else:
@@ -364,14 +395,16 @@ def main() -> int:
         WORKDIR.mkdir(parents=True, exist_ok=True)
 
         print(f"[{MONITOR_NAME}] fetching {PAGE_URL}…")
-        docs = fetch_documents()
-        print(f"[{MONITOR_NAME}] parsed {len(docs)} document entries")
-        # Log a few for sanity
-        for d in docs[:5]:
-            print(f"[{MONITOR_NAME}]   [{d['kind']}] {d['title']}")
-        if len(docs) > 5:
-            print(f"[{MONITOR_NAME}]   …and {len(docs) - 5} more")
+        all_docs = fetch_documents()
+        print(f"[{MONITOR_NAME}] parsed {len(all_docs)} total entries in folder")
 
+        # Keep only the N most recently-added entries (highest ids = newest).
+        docs = most_recent(all_docs, TOP_N)
+        print(f"[{MONITOR_NAME}] showing top {len(docs)} most recent:")
+        for d in docs:
+            print(f"[{MONITOR_NAME}]   [{d['kind']}] {d['title']}")
+
+        # "New" = any of the displayed top-N whose id we haven't recorded before.
         seen = load_seen()
         new_docs = [d for d in docs if d["id"] not in seen]
         print(f"[{MONITOR_NAME}] {len(new_docs)} new since last run")
@@ -380,6 +413,7 @@ def main() -> int:
         print(f"[{MONITOR_NAME}] sending email: {subject}")
         notify.send_email(to=recipient, subject=subject, html=html_body)
 
+        # Record the ids we displayed so they aren't re-flagged next time.
         seen.update(d["id"] for d in docs)
         save_seen(seen)
         print(f"[{MONITOR_NAME}] seen-set updated ({len(seen)} ids)")
