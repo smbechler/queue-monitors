@@ -146,14 +146,15 @@ def _clean_value(value: Any) -> Any:
 
 
 def summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
-    """Compute counts broken out by carve-out category, plus per-cycle counts.
+    """Compute counts: carve-out × request-status crosstab, plus per-cycle.
 
     Returns:
         {
+          "statuses": ["Active", "Done", "Under review", "Withdrawn", ...],
           "by_carveout": [
-            {"label": "Regular",      "active": N, "total": N, "withdrawn": N},
-            {"label": "IPP",          "active": N, "total": N, "withdrawn": N},
-            {"label": "Under Review", "active": N, "total": N, "withdrawn": N},
+            {"label": "Regular",      "total": N, "by_status": {status: n}},
+            {"label": "IPP",          "total": N, "by_status": {status: n}},
+            {"label": "Under Review", "total": N, "by_status": {status: n}},
           ],
           "by_cycle": [
             {"label": "ERAS Study Cycle 1", "active": N, "total": N, "withdrawn": N},
@@ -161,42 +162,67 @@ def summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
           ],
         }
 
+    Statuses are discovered from the data (alphabetical, "(blank)" last),
+    so a new MISO status becomes a new column automatically.
     Carve Out matching is case-insensitive. Blank/missing values count as Regular.
     """
     # Tally projects by carve-out category. Each entry: {"total", "withdrawn"}.
-    carveout_buckets = {
-        "Regular": {"total": 0, "withdrawn": 0},
-        "IPP": {"total": 0, "withdrawn": 0},
-        "Under Review": {"total": 0, "withdrawn": 0},
+    carveout_buckets: dict[str, dict[str, Any]] = {
+        "Regular": {"total": 0, "by_status": {}},
+        "IPP": {"total": 0, "by_status": {}},
+        "Under Review": {"total": 0, "by_status": {}},
     }
     cycle_buckets: dict[str, dict[str, int]] = {}
+    all_statuses: set[str] = set()
 
     for p in projects:
-        # Carve-out category (case-insensitive)
+        status = _status_of(p) or "(blank)"
+        all_statuses.add(status)
+
+        # Carve-out category (case-insensitive), broken out by request status
         category = _carveout_category(p)
         carveout_buckets[category]["total"] += 1
-        if _is_withdrawn(p):
-            carveout_buckets[category]["withdrawn"] += 1
+        by_status = carveout_buckets[category]["by_status"]
+        by_status[status] = by_status.get(status, 0) + 1
 
         # Study cycle bucket — blank cycle gets an explicit "(no cycle)" label
-        # so it's visible rather than silently dropped.
+        # so it's visible rather than silently dropped. Each cycle also tallies
+        # how many of its projects are IPP vs Regular carve-outs.
         cycle = (p.get("Study Cycle") or "").strip() or "(no cycle)"
-        bucket = cycle_buckets.setdefault(cycle, {"total": 0, "withdrawn": 0})
+        bucket = cycle_buckets.setdefault(
+            cycle, {"total": 0, "withdrawn": 0, "ipp": 0, "regular": 0}
+        )
         bucket["total"] += 1
         if _is_withdrawn(p):
             bucket["withdrawn"] += 1
+        if category == "IPP":
+            bucket["ipp"] += 1
+        elif category == "Regular":
+            bucket["regular"] += 1
 
-    # Convert into ordered lists with derived "active" = total - withdrawn.
+    # Cycles: Active/Total/Withdrawn plus IPP/Regular carve-out counts.
     def _finalize(label: str, b: dict[str, int]) -> dict[str, Any]:
         return {
             "label": label,
             "total": b["total"],
             "withdrawn": b["withdrawn"],
             "active": b["total"] - b["withdrawn"],
+            "ipp": b["ipp"],
+            "regular": b["regular"],
         }
 
+    # Status columns sorted alphabetically; (blank) goes last
+    statuses = sorted(
+        all_statuses,
+        key=lambda s: (s == "(blank)", s.lower()),
+    )
+
     by_carveout = [
-        _finalize(label, carveout_buckets[label])
+        {
+            "label": label,
+            "total": carveout_buckets[label]["total"],
+            "by_status": carveout_buckets[label]["by_status"],
+        }
         for label in ("Regular", "IPP", "Under Review")
     ]
     # Sort cycles alphabetically; (no cycle) goes last
@@ -206,7 +232,11 @@ def summarize(projects: list[dict[str, Any]]) -> dict[str, Any]:
     )
     by_cycle = [_finalize(c, cycle_buckets[c]) for c in cycle_labels]
 
-    return {"by_carveout": by_carveout, "by_cycle": by_cycle}
+    return {
+        "by_carveout": by_carveout,
+        "by_cycle": by_cycle,
+        "statuses": statuses,
+    }
 
 
 def _carveout_category(project: dict[str, Any]) -> str:
@@ -430,21 +460,64 @@ def _notes_diff_html(previous_notes: list[str], notes: list[str]) -> str:
 
 
 def _counts_table(counts: dict[str, Any]) -> str:
-    """Render both summary tables: by carve-out category and by ERAS cycle.
-
-    Each table has the same column shape: label, Active, Total, Withdrawn.
-    """
+    """Render the summary tables: carve-out × status crosstab, then by cycle."""
     parts: list[str] = []
-    parts.append(_breakdown_table("By Carve Out Category", counts["by_carveout"]))
     parts.append(
-        "<div style='height:16px;'></div>"
-    )  # spacer between tables
+        _carveout_status_table(
+            "By Carve Out Category", counts["by_carveout"], counts["statuses"]
+        )
+    )
+    parts.append("<div style='height:16px;'></div>")  # spacer
     parts.append(_breakdown_table("By Study Cycle", counts["by_cycle"]))
     return "".join(parts)
 
 
+def _carveout_status_table(
+    heading: str, rows: list[dict[str, Any]], statuses: list[str]
+) -> str:
+    """Crosstab: carve-out categories × request statuses.
+
+    Columns: Total, then one per status found in the data. Status cells
+    sum to Total in every row.
+    """
+    parts: list[str] = []
+    parts.append(
+        f"<h4 style='margin:8px 0 6px 0;font-size:14px;color:#444;'>"
+        f"{_esc(heading)}</h4>"
+    )
+    parts.append("<table style='border-collapse:collapse;font-size:14px;'>")
+    header_cells = [
+        "<th style='text-align:left;padding:6px 12px;border-bottom:2px solid #ccc;'></th>",
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total</th>",
+    ]
+    for status in statuses:
+        header_cells.append(
+            f"<th style='text-align:right;padding:6px 12px;"
+            f"border-bottom:2px solid #ccc;'>{_esc(status)}</th>"
+        )
+    parts.append("<thead><tr>" + "".join(header_cells) + "</tr></thead><tbody>")
+    for row in rows:
+        cells = [
+            f"<td style='padding:6px 12px;font-weight:600;'>{_esc(row['label'])}</td>",
+            f"<td style='padding:6px 12px;text-align:right;font-weight:600;'>{row['total']}</td>",
+        ]
+        for status in statuses:
+            cells.append(
+                f"<td style='padding:6px 12px;text-align:right;'>"
+                f"{row['by_status'].get(status, 0)}</td>"
+            )
+        parts.append("<tr>" + "".join(cells) + "</tr>")
+    parts.append("</tbody></table>")
+    return "".join(parts)
+
+
 def _breakdown_table(heading: str, rows: list[dict[str, Any]]) -> str:
-    """Render a single table with columns: label, Active, Total, Withdrawn."""
+    """Render the per-cycle table.
+
+    Columns, in order: Active | IPP | Regular | Total | Withdrawn.
+    Active = Total − Withdrawn (by request status); IPP and Regular are
+    carve-out category counts within the cycle.
+    """
     parts: list[str] = []
     parts.append(
         f"<h4 style='margin:8px 0 6px 0;font-size:14px;color:#444;'>"
@@ -455,6 +528,8 @@ def _breakdown_table(heading: str, rows: list[dict[str, Any]]) -> str:
         "<thead><tr>"
         "<th style='text-align:left;padding:6px 12px;border-bottom:2px solid #ccc;'></th>"
         "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Active</th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>IPP</th>"
+        "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Regular</th>"
         "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Total</th>"
         "<th style='text-align:right;padding:6px 12px;border-bottom:2px solid #ccc;'>Withdrawn</th>"
         "</tr></thead><tbody>"
@@ -464,6 +539,8 @@ def _breakdown_table(heading: str, rows: list[dict[str, Any]]) -> str:
             "<tr>"
             f"<td style='padding:6px 12px;font-weight:600;'>{_esc(row['label'])}</td>"
             f"<td style='padding:6px 12px;text-align:right;font-weight:600;'>{row['active']}</td>"
+            f"<td style='padding:6px 12px;text-align:right;'>{row['ipp']}</td>"
+            f"<td style='padding:6px 12px;text-align:right;'>{row['regular']}</td>"
             f"<td style='padding:6px 12px;text-align:right;'>{row['total']}</td>"
             f"<td style='padding:6px 12px;text-align:right;color:#888;'>{row['withdrawn']}</td>"
             "</tr>"
