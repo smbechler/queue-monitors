@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-07-22T13:15:13.514260+00:00",
+  "captured_at": "2026-07-22T15:38:38.068604+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
@@ -2252,5 +2252,15 @@
       "Non-Confidential Summary": "Sycamore Land Holdings, LLC proposes a 400 MW battery energy storage project (Sycamore BESS) in Vermillion County, Indiana to serve an incremental large load located in Clark County, Indiana.",
       "id": "100551"
     }
+  ],
+  "notes": [
+    "In advance of the start of each ERAS study period, MISO will post the projects that will be studied within that cycle based on updated common constraint analysis and any potential withdrawals.",
+    "MISO has received over 50 LSE ERAS applications and has reached the cap of allowed LSE projects submitted to ERAS.",
+    "None",
+    "Any new LSE project submissions will be added to the waitlist in the order received. An LSE project on the waitlist will be reviewed based on its ERAS queue position if an LSE within the 50 LSE project cap withdraws.",
+    "MISO has received over 10 IPP ERAS applications and has reached the cap of allowed IPP projects. Any new IPP projects submitted to ERAS will be added to a waitlist in the order received. There is currently a waitlist of 3 additional IPP project that were submitted to ERAS.",
+    "Request Status column refers to the current study status of the project (example: Done means the final SIS has been posted).",
+    "GIA Status column refers to the Current GIA Execution Status.",
+    "Post GIA Status column refers to the construction status of the project after the GIA has been executed."
   ]
 }
