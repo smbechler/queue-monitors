@@ -1,10 +1,11 @@
 {
-  "captured_at": "2026-07-21T18:13:48.194553+00:00",
+  "captured_at": "2026-07-22T13:15:13.514260+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx?v=20250925100619",
   "projects": [
     {
       "Project Number": null,
       "Application ID": 100016,
+      "GIA Status": null,
       "Interconnection Customer": null,
       "Request Status": "Withdrawn",
       "Order Submitted": 1,
@@ -34,6 +35,7 @@
     {
       "Project Number": "E0005",
       "Application ID": 100014,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Otter Tail Power Company",
       "Request Status": "Done",
       "Order Submitted": 2,
@@ -63,6 +65,7 @@
     {
       "Project Number": "E0023",
       "Application ID": 100105,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Minnesota Municipal Power Agency",
       "Request Status": "Done",
       "Order Submitted": 3,
@@ -92,6 +95,7 @@
     {
       "Project Number": "E0011",
       "Application ID": 100048,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Minnesota Power",
       "Request Status": "Done",
       "Order Submitted": 4,
@@ -121,6 +125,7 @@
     {
       "Project Number": "E0012",
       "Application ID": 100076,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Red Oak Ridge Energy Center LLC",
       "Request Status": "Done",
       "Order Submitted": 5,
@@ -150,6 +155,7 @@
     {
       "Project Number": "E0002",
       "Application ID": 100013,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "MidAmerican Energy Company",
       "Request Status": "Done",
       "Order Submitted": 6,
@@ -179,6 +185,7 @@
     {
       "Project Number": "E0010",
       "Application ID": 100085,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Alliant Energy / IPL",
       "Request Status": "Done",
       "Order Submitted": 7,
@@ -208,6 +215,7 @@
     {
       "Project Number": "E0003",
       "Application ID": 100044,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Lincoln Capital Land, LLC",
       "Request Status": "Done",
       "Order Submitted": 8,
@@ -237,6 +245,7 @@
     {
       "Project Number": null,
       "Application ID": 100087,
+      "GIA Status": null,
       "Interconnection Customer": null,
       "Request Status": "Withdrawn",
       "Order Submitted": 9,
@@ -266,6 +275,7 @@
     {
       "Project Number": null,
       "Application ID": 100103,
+      "GIA Status": null,
       "Interconnection Customer": null,
       "Request Status": "Withdrawn",
       "Order Submitted": 10,
@@ -295,6 +305,7 @@
     {
       "Project Number": "E0016",
       "Application ID": 100075,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Invenergy Clean Power Development LLC",
       "Request Status": "Done",
       "Order Submitted": 11,
@@ -324,6 +335,7 @@
     {
       "Project Number": null,
       "Application ID": 100096,
+      "GIA Status": null,
       "Interconnection Customer": null,
       "Request Status": "Withdrawn",
       "Order Submitted": 12,
@@ -353,6 +365,7 @@
     {
       "Project Number": "E0029",
       "Application ID": 100061,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Entergy Louisiana, LLC",
       "Request Status": "Done",
       "Order Submitted": 13,
@@ -382,6 +395,7 @@
     {
       "Project Number": "E0030",
       "Application ID": 100057,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "ENTERGY TEXAS, INC.",
       "Request Status": "Done",
       "Order Submitted": 14,
@@ -411,6 +425,7 @@
     {
       "Project Number": "E0013",
       "Application ID": 100051,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Ameren Missouri",
       "Request Status": "Done",
       "Order Submitted": 15,
@@ -440,6 +455,7 @@
     {
       "Project Number": "E0014",
       "Application ID": 100063,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Entergy Louisiana, LLC",
       "Request Status": "Done",
       "Order Submitted": 16,
@@ -469,6 +485,7 @@
     {
       "Project Number": "E0015",
       "Application ID": 100071,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Alliant Energy / IPL",
       "Request Status": "Done",
       "Order Submitted": 17,
@@ -498,6 +515,7 @@
     {
       "Project Number": "E0017",
       "Application ID": 100050,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Ameren Missouri",
       "Request Status": "Done",
       "Order Submitted": 18,
@@ -527,6 +545,7 @@
     {
       "Project Number": "E0031",
       "Application ID": 100058,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "ENTERGY MISSISSIPPI, LLC",
       "Request Status": "Done",
       "Order Submitted": 19,
@@ -556,6 +575,7 @@
     {
       "Project Number": "E0026",
       "Application ID": 100035,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Invenergy Cannon Falls",
       "Request Status": "Done",
       "Order Submitted": 20,
@@ -585,6 +605,7 @@
     {
       "Project Number": "E0047",
       "Application ID": 100059,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "ENTERGY MISSISSIPPI, LLC",
       "Request Status": "Done",
       "Order Submitted": 21,
@@ -614,6 +635,7 @@
     {
       "Project Number": "E0025",
       "Application ID": 100047,
+      "GIA Status": null,
       "Interconnection Customer": "ALLIANT ENERGY/IPL",
       "Request Status": "Withdrawn",
       "Order Submitted": 22,
@@ -643,6 +665,7 @@
     {
       "Project Number": "E0018",
       "Application ID": 100073,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "DTE Electric Company",
       "Request Status": "Done",
       "Order Submitted": 23,
@@ -672,6 +695,7 @@
     {
       "Project Number": "E0036",
       "Application ID": 100099,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "ALLIANT ENERGY/WPL",
       "Request Status": "Done",
       "Order Submitted": 24,
@@ -701,6 +725,7 @@
     {
       "Project Number": "E0037",
       "Application ID": 100067,
+      "GIA Status": null,
       "Interconnection Customer": "ALLIANT ENERGY/WPL",
       "Request Status": "Active",
       "Order Submitted": 25,
@@ -730,6 +755,7 @@
     {
       "Project Number": "E0007",
       "Application ID": 100069,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "DTE Electric Company",
       "Request Status": "Done",
       "Order Submitted": 26,
@@ -759,6 +785,7 @@
     {
       "Project Number": "E0008",
       "Application ID": 100072,
+      "GIA Status": null,
       "Interconnection Customer": "DTE Electric Company",
       "Request Status": "Active",
       "Order Submitted": 27,
@@ -788,6 +815,7 @@
     {
       "Project Number": "E0038",
       "Application ID": 100068,
+      "GIA Status": null,
       "Interconnection Customer": "ALLIANT ENERGY/WPL",
       "Request Status": "Active",
       "Order Submitted": 28,
@@ -817,6 +845,7 @@
     {
       "Project Number": "E0019",
       "Application ID": 100081,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "DTE Electric Company",
       "Request Status": "Done",
       "Order Submitted": 29,
@@ -846,6 +875,7 @@
     {
       "Project Number": "E0046",
       "Application ID": "100017",
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Indiana Municipal Power Agency",
       "Request Status": "Done",
       "Order Submitted": 30,
@@ -875,6 +905,7 @@
     {
       "Project Number": "E0009",
       "Application ID": 100021,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Resources Development, LLC",
       "Request Status": "Withdrawn",
       "Order Submitted": 31,
@@ -904,6 +935,7 @@
     {
       "Project Number": "E0024",
       "Application ID": 100070,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "NextEra Energy Resources Development, LLC",
       "Request Status": "Done",
       "Order Submitted": 32,
@@ -933,6 +965,7 @@
     {
       "Project Number": "E0027",
       "Application ID": 100030,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Red Butte Wind, LLC",
       "Request Status": "Done",
       "Order Submitted": 33,
@@ -962,6 +995,7 @@
     {
       "Project Number": "E0020",
       "Application ID": 100027,
+      "GIA Status": "Executed/Filed",
       "Interconnection Customer": "Benton Solar II, LLC",
       "Request Status": "Done",
       "Order Submitted": 34,
@@ -991,6 +1025,7 @@
     {
       "Project Number": "E0040",
       "Application ID": 100088,
+      "GIA Status": null,
       "Interconnection Customer": "Xcel Energy",
       "Request Status": "Active",
       "Order Submitted": 35,
@@ -1020,6 +1055,7 @@
     {
       "Project Number": "E0006",
       "Application ID": 100095,
+      "GIA Status": null,
       "Interconnection Customer": "Swift Energy Storage LLC",
       "Request Status": "Active",
       "Order Submitted": 36,
@@ -1049,6 +1085,7 @@
     {
       "Project Number": "E0021",
       "Application ID": 100026,
+      "GIA Status": null,
       "Interconnection Customer": "Brickyard Energy Storge, LLC",
       "Request Status": "Active",
       "Order Submitted": 37,
@@ -1078,6 +1115,7 @@
     {
       "Project Number": "E0032",
       "Application ID": 100060,
+      "GIA Status": null,
       "Interconnection Customer": "ENTERGY TEXAS, INC.",
       "Request Status": "Active",
       "Order Submitted": 38,
@@ -1107,6 +1145,7 @@
     {
       "Project Number": "E0022",
       "Application ID": 100028,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Resources Development, LLC",
       "Request Status": "Active",
       "Order Submitted": 39,
@@ -1136,6 +1175,7 @@
     {
       "Project Number": "E0041",
       "Application ID": 100090,
+      "GIA Status": null,
       "Interconnection Customer": "Xcel Energy",
       "Request Status": "Active",
       "Order Submitted": 40,
@@ -1165,6 +1205,7 @@
     {
       "Project Number": "E0042",
       "Application ID": 100046,
+      "GIA Status": null,
       "Interconnection Customer": "Northern Indiana Public Services Company LLC",
       "Request Status": "Active",
       "Order Submitted": 41,
@@ -1194,6 +1235,7 @@
     {
       "Project Number": "E0033",
       "Application ID": 100054,
+      "GIA Status": null,
       "Interconnection Customer": "Northern Indiana Public Services Company LLC",
       "Request Status": "Active",
       "Order Submitted": 42,
@@ -1223,6 +1265,7 @@
     {
       "Project Number": "E0035",
       "Application ID": 100055,
+      "GIA Status": null,
       "Interconnection Customer": "Northern Indiana Public Services Company LLC",
       "Request Status": "Withdrawn",
       "Order Submitted": 43,
@@ -1252,6 +1295,7 @@
     {
       "Project Number": "E0004",
       "Application ID": 100032,
+      "GIA Status": null,
       "Interconnection Customer": "Hackett Energy Storage LLC",
       "Request Status": "Active",
       "Order Submitted": 44,
@@ -1281,6 +1325,7 @@
     {
       "Project Number": "E0028",
       "Application ID": 100089,
+      "GIA Status": null,
       "Interconnection Customer": "Rochester Public Utilities",
       "Request Status": "Active",
       "Order Submitted": 45,
@@ -1310,11 +1355,12 @@
     {
       "Project Number": "E0034",
       "Application ID": 100122,
+      "GIA Status": null,
       "Interconnection Customer": "Basin Electric Power Cooperative",
-      "Request Status": "Active",
+      "Request Status": "Withdrawn",
       "Order Submitted": 46,
       "Submission Time": "2025-08-12T13:07:00",
-      "Date Withdrawn": null,
+      "Date Withdrawn": "2026-07-20T00:00:00",
       "Application In Service Date": "2027-11-01T00:00:00",
       "Transmission Owner": "NORTHERN STATES POWER COMPANY",
       "County": "Brookings",
@@ -1339,6 +1385,7 @@
     {
       "Project Number": "E0039",
       "Application ID": 100120,
+      "GIA Status": null,
       "Interconnection Customer": "Northern Indiana Public Services Company LLC",
       "Request Status": "Active",
       "Order Submitted": 47,
@@ -1368,6 +1415,7 @@
     {
       "Project Number": "E0043",
       "Application ID": 100144,
+      "GIA Status": null,
       "Interconnection Customer": "Entergy Louisiana, LLC",
       "Request Status": "Active",
       "Order Submitted": 48,
@@ -1397,6 +1445,7 @@
     {
       "Project Number": "E0044",
       "Application ID": 100145,
+      "GIA Status": null,
       "Interconnection Customer": "Entergy Louisiana, LLC",
       "Request Status": "Active",
       "Order Submitted": 49,
@@ -1426,6 +1475,7 @@
     {
       "Project Number": "E0045",
       "Application ID": 100146,
+      "GIA Status": null,
       "Interconnection Customer": "Entergy Louisiana, LLC",
       "Request Status": "Active",
       "Order Submitted": 50,
@@ -1455,6 +1505,7 @@
     {
       "Project Number": "E0048",
       "Application ID": 100157,
+      "GIA Status": null,
       "Interconnection Customer": "CLECO Power LLC",
       "Request Status": "Active",
       "Order Submitted": 51,
@@ -1484,6 +1535,7 @@
     {
       "Project Number": "E0049",
       "Application ID": 100187,
+      "GIA Status": null,
       "Interconnection Customer": "Alliant Energy/IPL",
       "Request Status": "Active",
       "Order Submitted": 52,
@@ -1513,6 +1565,7 @@
     {
       "Project Number": "E0051",
       "Application ID": 100190,
+      "GIA Status": null,
       "Interconnection Customer": "ENTERGY LOUISIANA, LLC",
       "Request Status": "Active",
       "Order Submitted": 53,
@@ -1542,6 +1595,7 @@
     {
       "Project Number": "E0054",
       "Application ID": 100196,
+      "GIA Status": null,
       "Interconnection Customer": "Hallador Power Company",
       "Request Status": "Active",
       "Order Submitted": 54,
@@ -1571,6 +1625,7 @@
     {
       "Project Number": "E0050",
       "Application ID": 100200,
+      "GIA Status": null,
       "Interconnection Customer": "D/B/A ALLIANT ENERGY",
       "Request Status": "Active",
       "Order Submitted": 55,
@@ -1600,6 +1655,7 @@
     {
       "Project Number": "E0053",
       "Application ID": 100198,
+      "GIA Status": null,
       "Interconnection Customer": "Bluejacket Solar LLC",
       "Request Status": "Withdrawn",
       "Order Submitted": 56,
@@ -1629,6 +1685,7 @@
     {
       "Project Number": "E0052",
       "Application ID": 100197,
+      "GIA Status": null,
       "Interconnection Customer": "Pumpkin Patch Solar LLC",
       "Request Status": "Active",
       "Order Submitted": 57,
@@ -1658,6 +1715,7 @@
     {
       "Project Number": "E0055",
       "Application ID": 100245,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Withdrawn",
       "Order Submitted": 58,
@@ -1687,6 +1745,7 @@
     {
       "Project Number": "E0057",
       "Application ID": 100259,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Active",
       "Order Submitted": 59,
@@ -1716,6 +1775,7 @@
     {
       "Project Number": "E0056",
       "Application ID": 100248,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Withdrawn",
       "Order Submitted": 60,
@@ -1745,6 +1805,7 @@
     {
       "Project Number": "E0058",
       "Application ID": 100186,
+      "GIA Status": null,
       "Interconnection Customer": "Little Rock Wind Project, LLC",
       "Request Status": "Active",
       "Order Submitted": 61,
@@ -1774,6 +1835,7 @@
     {
       "Project Number": "E0060",
       "Application ID": 100381,
+      "GIA Status": null,
       "Interconnection Customer": "D/B/A Missouri Electric Commission",
       "Request Status": "Active",
       "Order Submitted": 62,
@@ -1803,6 +1865,7 @@
     {
       "Project Number": "E0061",
       "Application ID": 100292,
+      "GIA Status": null,
       "Interconnection Customer": "DOUBLEC Energy Center LLC",
       "Request Status": "Active",
       "Order Submitted": 63,
@@ -1832,6 +1895,7 @@
     {
       "Project Number": "E0062",
       "Application ID": 100305,
+      "GIA Status": null,
       "Interconnection Customer": "\u200bDOUBLEC Energy Center 2",
       "Request Status": "Active",
       "Order Submitted": 64,
@@ -1861,6 +1925,7 @@
     {
       "Project Number": "E0063",
       "Application ID": 100445,
+      "GIA Status": null,
       "Interconnection Customer": "Trotman Energy Center LLC",
       "Request Status": "Active",
       "Order Submitted": 65,
@@ -1890,6 +1955,7 @@
     {
       "Project Number": "E0059",
       "Application ID": 100465,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Withdrawn",
       "Order Submitted": 66,
@@ -1919,6 +1985,7 @@
     {
       "Project Number": "E0064",
       "Application ID": 100480,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Active",
       "Order Submitted": 67,
@@ -1948,6 +2015,7 @@
     {
       "Project Number": null,
       "Application ID": 100481,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings Inc",
       "Request Status": "Under review",
       "Order Submitted": 68,
@@ -1977,6 +2045,7 @@
     {
       "Project Number": null,
       "Application ID": 100482,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings, Inc.",
       "Request Status": "Under review",
       "Order Submitted": 69,
@@ -2006,6 +2075,7 @@
     {
       "Project Number": null,
       "Application ID": 100486,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings, Inc",
       "Request Status": "Under review",
       "Order Submitted": 70,
@@ -2035,6 +2105,7 @@
     {
       "Project Number": null,
       "Application ID": 100535,
+      "GIA Status": null,
       "Interconnection Customer": "NextEra Energy Capital Holdings, Inc.",
       "Request Status": "Under review",
       "Order Submitted": 71,
@@ -2064,6 +2135,7 @@
     {
       "Project Number": null,
       "Application ID": 100378,
+      "GIA Status": null,
       "Interconnection Customer": "Maple Creek Energy LLC",
       "Request Status": "Under review",
       "Order Submitted": 72,
@@ -2093,6 +2165,7 @@
     {
       "Project Number": null,
       "Application ID": 100568,
+      "GIA Status": null,
       "Interconnection Customer": "Doublec Energy",
       "Request Status": "Under review",
       "Order Submitted": 73,
@@ -2122,6 +2195,7 @@
     {
       "Project Number": null,
       "Application ID": 100567,
+      "GIA Status": null,
       "Interconnection Customer": "Doublec Energy",
       "Request Status": "Under review",
       "Order Submitted": 74,
@@ -2151,6 +2225,7 @@
     {
       "Project Number": null,
       "Application ID": 100551,
+      "GIA Status": null,
       "Interconnection Customer": "Sycamore Land Holdings LLC",
       "Request Status": "Under review",
       "Order Submitted": 75,
