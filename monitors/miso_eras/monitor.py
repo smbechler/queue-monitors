@@ -79,12 +79,17 @@ def find_xlsx_url() -> str:
     return href
 
 
-def parse_xlsx(path: Path) -> list[dict[str, Any]]:
-    """Parse the ERAS spreadsheet into a list of project dicts.
+def parse_xlsx(path: Path) -> tuple[list[dict[str, Any]], list[str]]:
+    """Parse the ERAS spreadsheet into (projects, notes).
 
-    The first row is the header. Each subsequent row becomes a dict
-    keyed by column name. We use 'Application ID' as the stable
-    identifier (Project Number can be blank for withdrawn entries).
+    The first row is the header. Each subsequent row with an
+    'Application ID' becomes a project dict keyed by column name.
+
+    Rows that have content but NO Application ID — the disclaimer and
+    footnote text MISO puts below the table — are captured as `notes`:
+    one string per row (non-empty cells joined), in sheet order. These
+    are snapshotted and diffed like everything else, so edits to the
+    fine print show up in the email too.
     """
     wb = load_workbook(path, data_only=True, read_only=True)
     ws = wb.active
@@ -96,6 +101,7 @@ def parse_xlsx(path: Path) -> list[dict[str, Any]]:
     headers = [_clean_header(h) for h in headers_raw]
 
     projects: list[dict[str, Any]] = []
+    notes: list[str] = []
     for row in rows:
         if not any(cell not in (None, "") for cell in row):
             continue  # skip blank rows
@@ -103,12 +109,20 @@ def parse_xlsx(path: Path) -> list[dict[str, Any]]:
         # Use Application ID as the stable id field for diffing.
         app_id = record.get("Application ID")
         if app_id is None:
+            # Not a project row — treat as sheet note/disclaimer text.
+            text = " ".join(
+                str(_clean_value(cell)).strip()
+                for cell in row
+                if cell not in (None, "")
+            ).strip()
+            if text:
+                notes.append(text)
             continue
         record["id"] = str(app_id)
         projects.append(record)
 
     wb.close()
-    return projects
+    return projects, notes
 
 
 def _clean_header(value: Any) -> str:
@@ -227,20 +241,29 @@ def _is_ipp(project: dict[str, Any]) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def load_previous() -> list[dict[str, Any]] | None:
+def load_previous() -> tuple[list[dict[str, Any]] | None, list[str] | None]:
+    """Return (projects, notes) from the last snapshot.
+
+    `notes` is None (not []) when the snapshot predates note-tracking,
+    so the first run after this upgrade doesn't misreport every
+    disclaimer line as newly added.
+    """
     if not LATEST_SNAPSHOT.exists():
-        return None
+        return None, None
     with LATEST_SNAPSHOT.open("r") as f:
         data = json.load(f)
-    return data.get("projects")
+    return data.get("projects"), data.get("notes")
 
 
-def save_snapshot(projects: list[dict[str, Any]], xlsx_url: str) -> None:
+def save_snapshot(
+    projects: list[dict[str, Any]], xlsx_url: str, notes: list[str]
+) -> None:
     SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
     snapshot = {
         "captured_at": datetime.now(timezone.utc).isoformat(),
         "source_url": xlsx_url,
         "projects": projects,
+        "notes": notes,
     }
     with LATEST_SNAPSHOT.open("w") as f:
         json.dump(snapshot, f, indent=2, default=str)
@@ -268,13 +291,18 @@ def format_email(
     previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
+    notes: list[str],
+    previous_notes: list[str] | None,
 ) -> tuple[str, str]:
     """Return (subject, html_body)."""
+    # Notes are comparable only if the previous snapshot recorded them.
+    notes_changed = previous_notes is not None and notes != previous_notes
+
     # Subject line packs the most important info
     total = sum(row["total"] for row in counts["by_carveout"])
     if diff is None:
         subject = f"MISO ERAS — initial snapshot ({total} projects)"
-    elif diff.has_changes:
+    elif diff.has_changes or notes_changed:
         bits = []
         if diff.added:
             bits.append(f"+{len(diff.added)}")
@@ -282,11 +310,16 @@ def format_email(
             bits.append(f"-{len(diff.removed)}")
         if diff.changed:
             bits.append(f"~{len(diff.changed)}")
+        if notes_changed:
+            bits.append("notes updated")
         subject = f"MISO ERAS — {' '.join(bits)} | total {total}"
     else:
         subject = f"MISO ERAS — no changes | total {total}"
 
-    html = _render_html(counts, diff, current, previous, xlsx_url, last_check)
+    html = _render_html(
+        counts, diff, current, previous, xlsx_url, last_check,
+        notes, previous_notes, notes_changed,
+    )
     return subject, html
 
 
@@ -297,6 +330,9 @@ def _render_html(
     previous: list[dict[str, Any]] | None,
     xlsx_url: str,
     last_check: str | None,
+    notes: list[str],
+    previous_notes: list[str] | None,
+    notes_changed: bool,
 ) -> str:
     parts: list[str] = []
     parts.append(
@@ -328,17 +364,26 @@ def _render_html(
         previous_by_id = (
             {p["id"]: p for p in previous if p.get("id")} if previous else {}
         )
+        columns = _display_columns(current, previous)
         if diff.added:
             parts.append(f"<h4>Added ({len(diff.added)})</h4>")
-            parts.append(_project_table(diff.added))
+            parts.append(_project_table(diff.added, columns))
         if diff.removed:
             parts.append(f"<h4>Removed ({len(diff.removed)})</h4>")
-            parts.append(_project_table(diff.removed))
+            parts.append(_project_table(diff.removed, columns))
         if diff.changed:
             parts.append(f"<h4>Field changes ({len(diff.changed)})</h4>")
             parts.append(
-                _changed_project_table(diff.changed, current_by_id, previous_by_id)
+                _changed_project_table(diff.changed, current_by_id, previous_by_id, columns)
             )
+
+    # ---- Sheet notes / disclaimers ----
+    # Shown only when the footer text below the table actually changed.
+    if notes_changed and previous_notes is not None:
+        parts.append(
+            "<h3 style='margin-top:24px;'>Sheet notes &amp; disclaimers changed</h3>"
+        )
+        parts.append(_notes_diff_html(previous_notes, notes))
 
     # ---- Source link ----
     parts.append(
@@ -349,6 +394,39 @@ def _render_html(
     )
     parts.append("</div>")
     return "".join(parts)
+
+
+def _notes_diff_html(previous_notes: list[str], notes: list[str]) -> str:
+    """Removed lines struck through in red, added lines in green.
+
+    An edited line shows as one removed + one added. Duplicate lines are
+    handled with multiset semantics so only genuinely changed copies show.
+    """
+    remaining = list(notes)
+    removed: list[str] = []
+    for line in previous_notes:
+        if line in remaining:
+            remaining.remove(line)  # unchanged copy
+        else:
+            removed.append(line)
+    added = remaining  # current lines with no match in previous
+
+    items: list[str] = []
+    for line in removed:
+        items.append(
+            f"<li style='margin-bottom:6px;color:#b3261e;"
+            f"text-decoration:line-through;'>{_esc(line)}</li>"
+        )
+    for line in added:
+        items.append(
+            f"<li style='margin-bottom:6px;color:#0a7d2c;font-weight:600;'>"
+            f"{_esc(line)}</li>"
+        )
+    return (
+        "<ul style='font-size:13px;padding-left:20px;list-style:none;'>"
+        + "".join(items)
+        + "</ul>"
+    )
 
 
 def _counts_table(counts: dict[str, Any]) -> str:
@@ -398,27 +476,11 @@ def _breakdown_table(heading: str, rows: list[dict[str, Any]]) -> str:
 # Change tables (SPP-style: full row, with changed cells highlighted)
 # ---------------------------------------------------------------------------
 
-# Columns shown in the Added/Removed/Changed tables, in display order.
-# Each entry is (candidate CSV field names, display label). We try each
-# candidate in order so a slightly different MISO header still resolves.
-TABLE_COLUMNS: list[tuple[tuple[str, ...], str]] = [
-    (("Project Number",), "Project Number"),
-    (("Application ID", "Application"), "Application"),
-    (("Interconnection Customer",), "Interconnection Customer"),
-    (("Request Status",), "Request Status"),
-    (("Submitted", "Order Submitted", "Order"), "Order Submitted"),
-    (("Transmission Owner",), "Transmission Owner"),
-    (("County",), "County"),
-    (("State",), "State"),
-    (("Study Cycle",), "Study Cycle"),
-    (("Service Type",), "Service Type"),
-    (("POI Name", "POI"), "POI Name"),
-    (("Requested NRIS MW", "Requested NRIS", "Requested NRIS (MW)"), "Requested NRIS"),
-    (("Requested ERIS MW", "Requested ERIS", "Requested ERIS (MW)"), "Requested ERIS"),
-    (("Generating Facility",), "Generating Facility"),
-    (("Location of Need",), "Location of Need"),
-    (("Carve Out Requested",), "Carve Out Requested"),
-]
+# The change tables show EVERY column from the spreadsheet, in the sheet's
+# own column order. The column list is derived from the data at render time,
+# so if MISO adds, removes, or renames a column, the email adapts with no
+# code change. The internal 'id' field (a duplicate of Application ID that
+# the parser adds for diffing) is the only field excluded.
 
 _TABLE_STYLES = (
     "border-collapse:collapse;font-size:12px;font-family:-apple-system,"
@@ -431,33 +493,53 @@ _TH_STYLES = (
 _TD_STYLES = "padding:6px 10px;border-bottom:1px solid #eee;vertical-align:top;"
 
 
-def _col_value(project: dict[str, Any], candidates: tuple[str, ...]) -> Any:
-    """Return the first present value among candidate field names."""
-    for field in candidates:
-        if field in project and project[field] not in (None, ""):
-            return project[field]
-    return None
+def _display_columns(
+    current: list[dict[str, Any]],
+    previous: list[dict[str, Any]] | None,
+) -> list[str]:
+    """Every column in the sheet, in the sheet's own order.
+
+    Order comes from the current snapshot: parse_xlsx inserts fields in
+    header order and dicts preserve insertion order. Fields that exist only
+    in the previous snapshot (e.g. a column MISO renamed or dropped since
+    the last run) are appended at the end so their changes still render.
+    """
+    columns: list[str] = []
+    seen: set[str] = set()
+    for project in current:
+        for field in project.keys():
+            if field == "id" or field in seen:
+                continue
+            seen.add(field)
+            columns.append(field)
+    if previous:
+        for project in previous:
+            for field in project.keys():
+                if field == "id" or field in seen:
+                    continue
+                seen.add(field)
+                columns.append(field)
+    return columns
 
 
-def _table_header() -> str:
+def _table_header(columns: list[str]) -> str:
     cells = "".join(
-        f"<th style='{_TH_STYLES}'>{_esc(label)}</th>"
-        for _, label in TABLE_COLUMNS
+        f"<th style='{_TH_STYLES}'>{_esc(col)}</th>" for col in columns
     )
     return f"<thead><tr>{cells}</tr></thead>"
 
 
-def _project_table(projects: list[dict[str, Any]]) -> str:
-    """Flat table for Added / Removed sections."""
+def _project_table(projects: list[dict[str, Any]], columns: list[str]) -> str:
+    """Flat table for Added / Removed sections — all columns."""
     parts = ["<div style='overflow-x:auto;margin-bottom:16px;'>"]
     parts.append(f"<table style='{_TABLE_STYLES}'>")
-    parts.append(_table_header())
+    parts.append(_table_header(columns))
     parts.append("<tbody>")
     for project in projects:
         parts.append("<tr>")
-        for candidates, _ in TABLE_COLUMNS:
+        for field in columns:
             parts.append(
-                f"<td style='{_TD_STYLES}'>{_fmt(_col_value(project, candidates))}</td>"
+                f"<td style='{_TD_STYLES}'>{_fmt(project.get(field))}</td>"
             )
         parts.append("</tr>")
     parts.append("</tbody></table></div>")
@@ -468,24 +550,26 @@ def _changed_project_table(
     changes: list[tuple[str, dict[str, tuple[Any, Any]]]],
     current_by_id: dict[str, dict[str, Any]],
     previous_by_id: dict[str, dict[str, Any]],
+    columns: list[str],
 ) -> str:
-    """Table for changed projects, with changed cells highlighted."""
+    """Table for changed projects — all columns, changed cells highlighted.
+
+    Every cell revision the diff detected is displayed: any field in
+    field_changes gets the old value struck through in red above the new
+    value in green, on a yellow background.
+    """
     parts = ["<div style='overflow-x:auto;margin-bottom:16px;'>"]
     parts.append(f"<table style='{_TABLE_STYLES}'>")
-    parts.append(_table_header())
+    parts.append(_table_header(columns))
     parts.append("<tbody>")
 
     for project_id, field_changes in changes:
         new_row = current_by_id.get(project_id, {})
+        old_row = previous_by_id.get(project_id, {})
         parts.append("<tr>")
-        for candidates, _ in TABLE_COLUMNS:
-            # A column is "changed" if any of its candidate field names
-            # appears in the diff's field_changes for this project.
-            changed_field = next(
-                (f for f in candidates if f in field_changes), None
-            )
-            if changed_field:
-                old_val, new_val = field_changes[changed_field]
+        for field in columns:
+            if field in field_changes:
+                old_val, new_val = field_changes[field]
                 cell = (
                     f"<span style='color:#b3261e;text-decoration:line-through;'>"
                     f"{_fmt(old_val)}</span><br>"
@@ -494,7 +578,10 @@ def _changed_project_table(
                 )
                 td_style = _TD_STYLES + "background:#fff8d4;white-space:normal;"
             else:
-                cell = _fmt(_col_value(new_row, candidates))
+                # Unchanged cell: show current value; fall back to the old
+                # value for previous-only columns (e.g. after a rename).
+                value = new_row.get(field, old_row.get(field))
+                cell = _fmt(value)
                 td_style = _TD_STYLES
             parts.append(f"<td style='{td_style}'>{cell}</td>")
         parts.append("</tr>")
@@ -539,29 +626,34 @@ def main() -> int:
         local_xlsx = fetch.download(xlsx_url, WORKDIR / "current.xlsx")
 
         print(f"[{MONITOR_NAME}] parsing…")
-        projects = parse_xlsx(local_xlsx)
-        print(f"[{MONITOR_NAME}] parsed {len(projects)} projects")
+        projects, notes = parse_xlsx(local_xlsx)
+        print(f"[{MONITOR_NAME}] parsed {len(projects)} projects, "
+              f"{len(notes)} sheet note/disclaimer lines")
 
         counts = summarize(projects)
         print(f"[{MONITOR_NAME}] counts: {counts}")
 
-        previous = load_previous()
+        previous, previous_notes = load_previous()
         if previous is None:
             diff = None
         else:
             diff = diff_lib.diff_snapshots(
                 previous, projects, id_field="id", ignore_fields=IGNORE_FIELDS
             )
+        if previous_notes is None:
+            print(f"[{MONITOR_NAME}] previous snapshot has no notes — "
+                  f"note tracking starts with this run")
 
         last_check = previous_capture_time()
         subject, html = format_email(
-            counts, diff, projects, previous, xlsx_url, last_check
+            counts, diff, projects, previous, xlsx_url, last_check,
+            notes, previous_notes,
         )
 
         print(f"[{MONITOR_NAME}] sending email: {subject}")
         notify.send_email(to=recipient, subject=subject, html=html)
 
-        save_snapshot(projects, xlsx_url)
+        save_snapshot(projects, xlsx_url, notes)
         print(f"[{MONITOR_NAME}] snapshot saved")
         return 0
 
