@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-07-22T15:07:39.645965+00:00",
-  "source_last_updated": "7/21/2026",
+  "captured_at": "2026-07-23T15:12:17.980558+00:00",
+  "source_last_updated": "7/22/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -11862,7 +11862,7 @@
       "State": "TX",
       "TO at POI": "AEP",
       "In-Service Date": "4/1/2025",
-      "Commercial Operation Date": "4/22/2029",
+      "Commercial Operation Date": "4/2/2030",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "180",
@@ -16302,7 +16302,7 @@
       "State": "TX",
       "TO at POI": "AEP",
       "In-Service Date": "12/31/2021",
-      "Commercial Operation Date": "6/1/2027",
+      "Commercial Operation Date": "9/1/2028",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "150",
