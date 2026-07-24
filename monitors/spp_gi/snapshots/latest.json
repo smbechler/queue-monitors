@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-07-23T15:12:17.980558+00:00",
-  "source_last_updated": "7/22/2026",
+  "captured_at": "2026-07-24T14:59:38.634778+00:00",
+  "source_last_updated": "7/24/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -27658,7 +27658,7 @@
       "Request Received": "10/2/2025",
       "Date Withdrawn": null,
       "Status": "ERAS",
-      "JTIQ Participant": "Yes",
+      "JTIQ Participant": "No",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
       "id": "ERAS-2025-019"
