@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-07-27T15:45:15.192962+00:00",
-  "source_last_updated": "7/24/2026",
+  "captured_at": "2026-07-28T15:24:00.558856+00:00",
+  "source_last_updated": "7/27/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -11877,7 +11877,7 @@
       "Substation or Line": "Longwood to Scottville 138 kV line",
       "Request Received": "6/23/2022",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
