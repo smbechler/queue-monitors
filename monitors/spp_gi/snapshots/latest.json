@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-07-30T15:14:24.629779+00:00",
-  "source_last_updated": "7/29/2026",
+  "captured_at": "2026-07-31T15:23:00.850394+00:00",
+  "source_last_updated": "7/30/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -14997,7 +14997,7 @@
       "Substation or Line": "Leland Olds 345kV substation",
       "Request Received": "5/17/2019",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -30576,7 +30576,7 @@
     {
       "Generation Interconnection Number": "2022-G7",
       "IFS Queue Number": null,
-      "Current Cluster": "RTOE Transitional Cluster",
+      "Current Cluster": null,
       "Cluster Group": null,
       "Nearest Town or County": "Weld County",
       "State": "CO",
