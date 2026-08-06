@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-08-05T15:17:25.596234+00:00",
-  "source_last_updated": "8/5/2026",
+  "captured_at": "2026-08-06T15:18:21.898149+00:00",
+  "source_last_updated": "8/6/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -10062,7 +10062,7 @@
       "State": "OK",
       "TO at POI": "WFEC",
       "In-Service Date": "5/4/2026",
-      "Commercial Operation Date": "9/1/2026",
+      "Commercial Operation Date": "9/1/2029",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "191",
@@ -10077,7 +10077,7 @@
       "Substation or Line": "Prague - Chernicky 138 kV Line",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -18042,7 +18042,7 @@
       "State": "OK",
       "TO at POI": "AEP",
       "In-Service Date": "12/1/2021",
-      "Commercial Operation Date": "6/6/2026",
+      "Commercial Operation Date": "5/6/2026",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "124.7",
