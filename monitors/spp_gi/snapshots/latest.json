@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-08-19T13:48:31.395342+00:00",
-  "source_last_updated": "8/18/2026",
+  "captured_at": "2026-08-20T13:50:19.344309+00:00",
+  "source_last_updated": "8/19/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -6169,7 +6169,7 @@
       "MAX Summer MW": "250",
       "MAX Winter MW": "250",
       "Service Type": "ER/NR",
-      "Requested Maximum Injection Capability (MW)": "150",
+      "Requested Maximum Injection Capability (MW)": "250",
       "Requested Network Resource Deliverability (MW)": "250",
       "Nameplate Capacity": "253.347",
       "Generation Type": "Solar",
