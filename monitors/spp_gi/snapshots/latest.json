@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-08-24T13:54:25.220522+00:00",
-  "source_last_updated": "8/21/2026",
+  "captured_at": "2026-08-25T13:53:46.685024+00:00",
+  "source_last_updated": "8/25/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -10872,7 +10872,7 @@
       "State": "KS",
       "TO at POI": "KACY",
       "In-Service Date": "4/15/2028",
-      "Commercial Operation Date": "7/1/2028",
+      "Commercial Operation Date": "8/30/2029",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "200",
@@ -10887,7 +10887,7 @@
       "Substation or Line": "Nearman 161 kV Substation",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
