@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-09-01T17:14:37.796809+00:00",
-  "source_last_updated": "9/1/2026",
+  "captured_at": "2026-09-02T17:04:05.604219+00:00",
+  "source_last_updated": "9/2/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -13947,7 +13947,7 @@
       "Substation or Line": "Russell 115 kV Substation",
       "Request Received": "4/30/2020",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/COMMERCIAL OPERATION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -16392,7 +16392,7 @@
       "State": "OK",
       "TO at POI": "OGE",
       "In-Service Date": "6/1/2020",
-      "Commercial Operation Date": "12/1/2027",
+      "Commercial Operation Date": "5/1/2028",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "72.5",
@@ -27837,7 +27837,7 @@
       "Substation or Line": "Grec #1 Interconnect 161kV Substation",
       "Request Received": "10/1/2025",
       "Date Withdrawn": null,
-      "Status": "ERAS",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "Yes",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
