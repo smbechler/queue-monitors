@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-09-29T18:30:39.668316+00:00",
-  "source_last_updated": "9/28/2026",
+  "captured_at": "2026-09-30T18:19:42.344493+00:00",
+  "source_last_updated": "9/30/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -10797,10 +10797,10 @@
       "Substation or Line": "Maud 138 kV substation",
       "Request Received": "2/28/2023",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
-      "Cause of Delay": null,
+      "Cause of Delay": "Suspended 9/29/2026 - ab",
       "id": "GEN-2022-238"
     },
     {
@@ -16137,7 +16137,7 @@
       "Substation or Line": "Spalding to North Loup 115kV",
       "Request Received": "11/6/2017",
       "Date Withdrawn": null,
-      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
+      "Status": "IA FULLY EXECUTED/ON SUSPENSION",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
