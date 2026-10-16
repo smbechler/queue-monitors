@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-10-15T20:09:17.915840+00:00",
+  "captured_at": "2026-10-16T19:47:09.085604+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx",
   "projects": [
     {
@@ -1064,7 +1064,7 @@
       "Request Status": "Active",
       "Order Submitted": 35,
       "Submission Time": "2025-08-06T09:00:58",
-      "Date Withdrawn": null,
+      "Date Withdrawn": "2026-08-26T00:00:00",
       "Application In Service Date": "2028-04-08T00:00:00",
       "Transmission Owner": "NORTHERN STATES POWER COMPANY",
       "County": "Reading",
@@ -2235,11 +2235,11 @@
       "id": "100378"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0072",
       "Application ID": 100568,
       "GIA Status": null,
       "Interconnection Customer": "Doublec Energy",
-      "Request Status": "Under review",
+      "Request Status": "Reviewed",
       "Order Submitted": 73,
       "Submission Time": "2026-07-08-16:41",
       "Date Withdrawn": null,
@@ -2266,11 +2266,11 @@
       "id": "100568"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0071",
       "Application ID": 100567,
       "GIA Status": null,
       "Interconnection Customer": "Doublec Energy",
-      "Request Status": "Under review",
+      "Request Status": "Reviewed",
       "Order Submitted": 74,
       "Submission Time": "2026-07-08-16:46",
       "Date Withdrawn": null,
@@ -2297,11 +2297,11 @@
       "id": "100567"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0070",
       "Application ID": 100551,
       "GIA Status": null,
       "Interconnection Customer": "Sycamore Land Holdings LLC",
-      "Request Status": "Under review",
+      "Request Status": "Reviewed",
       "Order Submitted": 75,
       "Submission Time": "2026-07-08-18:31",
       "Date Withdrawn": null,
@@ -2328,11 +2328,11 @@
       "id": "100551"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0073",
       "Application ID": 100640,
       "GIA Status": null,
       "Interconnection Customer": "Bluejacket Solar LLC",
-      "Request Status": "Under review",
+      "Request Status": "Reviewed",
       "Order Submitted": 76,
       "Submission Time": "2026-07-29-12:38",
       "Date Withdrawn": null,
@@ -2359,11 +2359,11 @@
       "id": "100640"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0074",
       "Application ID": 100475,
       "GIA Status": null,
       "Interconnection Customer": "Atlas Storage LLC",
-      "Request Status": "Under review",
+      "Request Status": "Reviewed",
       "Order Submitted": 77,
       "Submission Time": "2026-8-10-15:57",
       "Date Withdrawn": null,
@@ -2388,15 +2388,48 @@
       "Non-Confidential Summary": "Project Atlas will address a resource adequacy deficiency supported by the attached documentation. Specifically, NIPSCO\u2019s 2024 IRP identifies that, taking into account significant new load (that was only identified as early as 2024), NIPSCO\u2019s total peak load is projected to grow from 2,900 MW in 2028 to 5,100 MW in 2035 under its base case, and to as much as 11,100 MW by 2035 (see IRP, Figure 3-42, page 81). This is due to the addition of up to 8,600 MW of new load predominantly from hyperscaler data centers. Given NIPSCO\u2019s current resource supply, additional generation is urgently needed to be able to timely and reliably serve this new load (see IRP, pages 16-17).",
       "": null,
       "id": "100475"
+    },
+    {
+      "Project Number": null,
+      "Application ID": 100601,
+      "GIA Status": null,
+      "Interconnection Customer": "Alsey Solar, LLC",
+      "Request Status": "Under review",
+      "Order Submitted": 78,
+      "Submission Time": "2026-09-29T12:02:00",
+      "Date Withdrawn": null,
+      "Application In Service Date": "2029-03-31T00:00:00",
+      "Transmission Owner": "Ameren Illinois",
+      "County": "Scott",
+      "State": "IL",
+      "Study Cycle": "TBD",
+      "Service Type": "NRIS",
+      "POI Name": "Ballard Substation 138kV",
+      "Max Summer MW": 172.5,
+      "Max Winter MW": 172.5,
+      "Fuel Type": "Solar",
+      "Generating Facility": "Photovoltaic",
+      "Post GIA Status": "Not started",
+      "Negotiated In Service Date": null,
+      "Requested ERIS MW": 168.8,
+      "Requested NRIS MW": 168.8,
+      "MW Range of Need": "100-200",
+      "Location of Need": "Scott County LRZ 4",
+      "Carve Out Requested": "Retail Choice",
+      "Non-Confidential Summary": "Alsey Solar, LLC proposes a 169 MW solar project (Alsey Solar) in Scott County, Indiana to serve an incremental large load located in Scott County, Indiana.",
+      "": null,
+      "id": "100601"
     }
   ],
   "notes": [
     "In advance of the start of each ERAS study period, MISO will post the projects that will be studied within that cycle based on updated common constraint analysis and any potential withdrawals.",
-    "MISO has received over 50 LSE ERAS applications and has reached the cap of allowed LSE projects submitted to ERAS.",
-    "None",
-    "Any new LSE project submissions will be added to the waitlist in the order received. An LSE project on the waitlist will be reviewed based on its ERAS queue position if an LSE within the 50 LSE project cap withdraws.",
+    "None None",
+    "MISO has received over 1 retail ERAS application that is currently under review.",
+    "MISO has received over 50 LSE ERAS applications and has reached the cap of allowed LSE projects submitted to ERAS. None None",
+    "Any new LSE project submissions will be added to the waitlist in the order received. An LSE project on the waitlist will be reviewed based on its ERAS queue position if an LSE within the 50 LSE project cap withdraws. None None",
     "MISO has received over 10 IPP ERAS applications and has reached the cap of allowed IPP projects. Any new IPP projects submitted to ERAS will be added to a waitlist in the order received. There is currently a waitlist of 3 additional IPP project that were submitted to ERAS.",
-    "Request Status column refers to the current study status of the project (example: Done means the final SIS has been posted).",
+    "None",
+    "Request Status column refers to the current study status of the project (examples: Done means the final SIS has been posted. Reviewed means the application was reviewed but the project cannot currently proceed because it was submitted over the relevant cap.)",
     "GIA Status column refers to the Current GIA Execution Status.",
     "Post GIA Status column refers to the construction status of the project after the GIA has been executed."
   ]
