@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-10-21T17:56:42.371760+00:00",
-  "source_last_updated": "10/21/2026",
+  "captured_at": "2026-10-22T17:53:43.956638+00:00",
+  "source_last_updated": "10/22/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -2228,7 +2228,7 @@
       "IFS Queue Number": null,
       "Current Cluster": "Surplus",
       "Cluster Group": "03 CENTRAL",
-      "Nearest Town or County": "Thomas County",
+      "Nearest Town or County": "Hodgeman and Ford",
       "State": "KS",
       "TO at POI": "SUNC",
       "In-Service Date": null,
@@ -2244,7 +2244,7 @@
       "Nameplate Capacity": "0",
       "Generation Type": "Battery/Storage",
       "Fuel Type": null,
-      "Substation or Line": "Holcomb 345kV",
+      "Substation or Line": "SUNC Spearville - Holcomb 345kV",
       "Request Received": "6/4/2026",
       "Date Withdrawn": null,
       "Status": "SPECIAL STUDY",
@@ -5023,7 +5023,7 @@
       "TO at POI": "OG&E",
       "In-Service Date": null,
       "Commercial Operation Date": "10/9/2026",
-      "Cessation Date": "8/1/2026",
+      "Cessation Date": "10/9/2026",
       "Original Generator Commercial Op Date": null,
       "Capacity": "300",
       "MAX Summer MW": "300",
