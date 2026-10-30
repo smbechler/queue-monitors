@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-10-29T18:51:36.173416+00:00",
-  "source_last_updated": "10/28/2026",
+  "captured_at": "2026-10-30T18:29:12.911503+00:00",
+  "source_last_updated": "10/29/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -9432,7 +9432,7 @@
       "State": "LA",
       "TO at POI": "AEP",
       "In-Service Date": "2/4/2028",
-      "Commercial Operation Date": "11/19/2028",
+      "Commercial Operation Date": "11/1/2029",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "150",
@@ -9447,7 +9447,7 @@
       "Substation or Line": "Red Pointe 138 kV Substation",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
