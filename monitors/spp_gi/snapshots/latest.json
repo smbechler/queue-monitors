@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-11-02T22:13:46.014598+00:00",
-  "source_last_updated": "10/30/2026",
+  "captured_at": "2026-11-03T19:59:40.010576+00:00",
+  "source_last_updated": "11/3/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -10767,7 +10767,7 @@
       "Substation or Line": "Finney-Carpenter 345 KV line",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "FACILITY STUDY STAGE",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -12252,7 +12252,7 @@
       "State": "OK",
       "TO at POI": "OGE",
       "In-Service Date": "12/21/2025",
-      "Commercial Operation Date": "12/31/2027",
+      "Commercial Operation Date": "8/31/2028",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "100",
