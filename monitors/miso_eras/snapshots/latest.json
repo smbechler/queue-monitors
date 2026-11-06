@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-05T22:29:13.728188+00:00",
+  "captured_at": "2026-11-06T21:54:45.539008+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx",
   "projects": [
     {
@@ -2390,11 +2390,11 @@
       "id": "100475"
     },
     {
-      "Project Number": null,
+      "Project Number": "E0075",
       "Application ID": 100601,
       "GIA Status": null,
       "Interconnection Customer": "Alsey Solar, LLC",
-      "Request Status": "Under review",
+      "Request Status": "Active",
       "Order Submitted": 78,
       "Submission Time": "2026-09-29T12:02:00",
       "Date Withdrawn": null,
@@ -2424,7 +2424,7 @@
   "notes": [
     "In advance of the start of each ERAS study period, MISO will post the projects that will be studied within that cycle based on updated common constraint analysis and any potential withdrawals.",
     "None None",
-    "MISO has received over 1 retail ERAS application that is currently under review.",
+    "MISO has received over 1 retail ERAS application",
     "MISO has received over 50 LSE ERAS applications and has reached the cap of allowed LSE projects submitted to ERAS. None None",
     "Any new LSE project submissions will be added to the waitlist in the order received. An LSE project on the waitlist will be reviewed based on its ERAS queue position if an LSE within the 50 LSE project cap withdraws. None None",
     "MISO has received over 10 IPP ERAS applications and has reached the cap of allowed IPP projects. Any new IPP projects submitted to ERAS will be added to a waitlist in the order received. There is currently a waitlist of 3 additional IPP project that were submitted to ERAS.",
