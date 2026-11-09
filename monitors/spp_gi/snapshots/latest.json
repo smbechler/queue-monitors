@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-11-06T19:53:33.156617+00:00",
-  "source_last_updated": "11/6/2026",
+  "captured_at": "2026-11-09T22:55:10.100965+00:00",
+  "source_last_updated": "11/9/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -26922,7 +26922,7 @@
       "State": "KS",
       "TO at POI": "SEPC",
       "In-Service Date": "3/15/2027",
-      "Commercial Operation Date": "5/1/2027",
+      "Commercial Operation Date": "1/15/2027",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "150",
@@ -26937,7 +26937,7 @@
       "Substation or Line": "Fort Dodge 115 kV Substation",
       "Request Received": "10/1/2025",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "No",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
