@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-11-10T20:20:32.206577+00:00",
-  "source_last_updated": "11/9/2026",
+  "captured_at": "2026-11-11T20:03:41.365763+00:00",
+  "source_last_updated": "11/11/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -9942,7 +9942,7 @@
       "State": "MO",
       "TO at POI": "INDN",
       "In-Service Date": "2/1/2028",
-      "Commercial Operation Date": "6/1/2028",
+      "Commercial Operation Date": "6/1/2031",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "150",
@@ -9957,7 +9957,7 @@
       "Substation or Line": "Sub M 161 kV Substation",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -16962,7 +16962,7 @@
       "State": "TX",
       "TO at POI": "SPS",
       "In-Service Date": "10/31/2020",
-      "Commercial Operation Date": "10/15/2026",
+      "Commercial Operation Date": "11/15/2027",
       "Cessation Date": null,
       "Original Generator Commercial Op Date": null,
       "Capacity": "300",
