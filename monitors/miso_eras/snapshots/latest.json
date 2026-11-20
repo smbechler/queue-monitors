@@ -1,5 +1,5 @@
 {
-  "captured_at": "2026-11-19T23:23:11.112175+00:00",
+  "captured_at": "2026-11-20T22:55:43.619035+00:00",
   "source_url": "https://cdn.misoenergy.org/ERAS%20Interconnection%20Requests718482.xlsx",
   "projects": [
     {
@@ -1433,11 +1433,11 @@
       "Application ID": 100120,
       "GIA Status": null,
       "Interconnection Customer": "Northern Indiana Public Services Company LLC",
-      "Request Status": "Active",
+      "Request Status": "Withdrawn",
       "Order Submitted": 47,
-      "Submission Time": "2025-08-13T14:01:00",
+      "Submission Time": 45882.584027777775,
       "Date Withdrawn": null,
-      "Application In Service Date": "2027-05-01T00:00:00",
+      "Application In Service Date": 46508,
       "Transmission Owner": "Northern Indiana Public Services Company LLC",
       "County": "Porter",
       "State": "IN",
