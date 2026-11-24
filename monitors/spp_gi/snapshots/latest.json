@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-11-20T20:58:03.792403+00:00",
-  "source_last_updated": "11/20/2026",
+  "captured_at": "2026-11-24T00:39:00.045338+00:00",
+  "source_last_updated": "11/23/2026",
   "source_url": "https://opsportal.spp.org/Studies/GenerateActiveCSV",
   "projects": [
     {
@@ -10197,7 +10197,7 @@
       "Substation or Line": "Mooreland - Noel 138 kV Line",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -10287,7 +10287,7 @@
       "Substation or Line": "Unger - Frogville 138 kV line",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
@@ -10437,7 +10437,7 @@
       "Substation or Line": "Tupelo - Atoka 138 kV Line",
       "Request Received": "10/2/2023",
       "Date Withdrawn": null,
-      "Status": "IA PENDING",
+      "Status": "IA FULLY EXECUTED/ON SCHEDULE",
       "JTIQ Participant": "N/A",
       "JTIQ Commitment": null,
       "Cause of Delay": null,
